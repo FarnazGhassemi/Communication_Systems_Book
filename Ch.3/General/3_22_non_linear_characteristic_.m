@@ -1,3 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                  Illustrating Definition 3_21:               %
+%                   Non-Linear Characteristic                  %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                   Chapter 3-Section 3-4                      %
+%                                                              %
+%                                                              %
+%   Version.1:             03/10/27---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 figure;
 hold on;
 ylim([-1, 1]); % Set the y-axis range from -1 to 1
