@@ -1,28 +1,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 3-3:               %
-%     Types of Adverse Effects of Channel On Message Signal    %
+%          Illustrating Definition 3_11 trough 3-14:           %
+%                     Channel Effects                          %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 3-Section 3                      %
+%                   Chapter 3-Section 3-2                      %
 %                                                              %
 %                                                              %
-%   Version.2:             03/09/27---Dr.Ghassemi              %
-%   Version.1:             96/06/30---Dr.Ghassemi              %
+%   Version.1:             03/10/27---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
 close all;
 clear all;
 clc;
-
-t=0:0.001:1;
-w0=4;
-fi=pi()/2;% change it to 2*pi()/2 and see the results
-figure(1)
-grid on
-A=[1,-1/3,1/5];
 colors=[0,0,0;                       %1-Black
         0,0,0.75;                    %2-Blue
         214/255,39/255,40/255;       %3-Red
@@ -37,60 +26,126 @@ colors=[0,0,0;                       %1-Black
         70/255,0,114/255;            %12-Dark Blue
         0,0.5,0.25                   %13-Green
         ];
+grayColor = [0.5, 0.5, 0.5];
 marks={'-';'--';':';'-.'};
-nn=2;
-kk=0;
-for i=1:nn    
-    a1=A(1)*cos(2*pi()*w0*t+fi);
-    figure(i)
-    j=1;
-    kk=1;
-    subplot(5,1,1)
-    kk=kk+1;
-    plot(t,a1,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',2)
-    ylabel('(1)','FontWeight','bold')
-    grid on,hold on
-    
-    a2=A(2)*cos(2*pi()*3*w0*t+fi);
-    subplot(5,1,2)
-    kk=kk+1;
-    plot(t,a2,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',2)
-    ylabel('(2)','FontWeight','bold')
-    grid on,hold on
-    
-    a3=A(3)*cos(2*pi()*5*w0*t+fi);
-    subplot(5,1,3)
-    kk=kk+1;
-    plot(t,a3,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',2)
-    ylabel('(3)','FontWeight','bold')
-    grid on,hold on
-  
-%     y=input('Press any key to continue:')
-    kk=kk-3;
-    %mod(i+2,length(colors))+1
-    a4=a1+a2+a3;
-    subplot(5,1,4)
-    plot(t,a4,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',2)
-    ylabel('(4)','FontWeight','bold')
-    grid on,hold on
 
-    subplot(5,1,5)
-    plot(t,a4,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',2)
-    grid on,hold on
-    kk=kk+3;
-    plot(t,a1,'color',colors(kk-2,:),'LineStyle',marks{j},'LineWidth',1.5)
-    grid on,hold on
-    plot(t,a2,'color',colors(kk-1,:),'LineStyle',marks{j},'LineWidth',1.5)
-    grid on,hold on
-    plot(t,a3,'color',colors(kk,:),'LineStyle',marks{j},'LineWidth',1.5)
-    ylabel('(5)','FontWeight','bold')
-    grid on
-    
-    if i<nn
-        A=input('New coefficients(Default: [1,-1/3,1/5]?')
-    end
-%     if (A==0) 
-%         i=3;
-%     end
-end
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
+
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
+
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
+
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
+
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           Attenuation                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+PM=cd;
+load([PM,'\ABio7.mat'])
+
+alpha=5;
+d1=6;
+d2=d1*2;
+l1=1/10^(d1*alpha/10);
+l2=1/10^(d2*alpha/10);
+figure;
+subplot(3,1,1)
+plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+title('Original ECG Signal')
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,2)
+plot(benchcicbar(4,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
+title(['ECG Signal-Attenuated with ',num2str(d1),'m cable(\alpha=5)'])
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,3)
+plot(benchcicbar(4,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
+title(['ECG Signal-Attenuated with ',num2str(d2),'m cable(\alpha=5)'])
+ylim([-3, 9])
+hold on
+grid on
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           Inteference                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+n1=0.3;
+n2=1;
+Int1 =n1*benchcicbar(6,1:1500);
+Int2 =n2*benchcicbar(6,1:1500);
+figure;
+subplot(4,1,1)
+plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+title('Original ECG Signal')
+hold on
+ylim([-3, 9])
+grid on
+subplot(4,1,2)
+plot(benchcicbar(6,1:1500),'Color', colors(3,:),'LineWidth', 2)
+title('Breathing Signal')
+hold on
+ylim([-2.5, 2])
+grid on
+
+subplot(4,1,3)
+plot(benchcicbar(4,1:1500)+Int1,'Color', colors(4,:),'LineWidth', 2)
+title(['ECG Signal + Low Interfernce of Breathing signal'])
+hold on
+ylim([-3, 9])
+grid on
+subplot(4,1,4)
+plot(benchcicbar(4,1:1500)+Int2,'Color', colors(5,:),'LineWidth', 2)
+title(['ECG Signal + High Interfernce of Breathing signal'])
+hold on
+ylim([-3, 9])
+grid on
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                              Noise                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+n1=0.1;
+n2=5;
+noise1 = wgn( 1, 1500 , n1 );
+noise2 = wgn( 1, 1500 , n2 );
+figure;
+subplot(3,1,1)
+plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+title('Original ECG Signal')
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,2)
+plot(benchcicbar(4,1:1500)+noise1,'Color', colors(3,:),'LineWidth', 2)
+title(['ECG Signal + Noise(',num2str(n1),'dBW)'])
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,3)
+plot(benchcicbar(4,1:1500)+noise2,'Color', colors(4,:),'LineWidth', 2)
+title(['ECG Signal + Noise(',num2str(n2),'dBW)'])
+hold on
+ylim([-3, 9])
+grid on
