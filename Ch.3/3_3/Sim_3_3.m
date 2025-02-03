@@ -62,7 +62,7 @@ set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 PM=cd;
-load([PM,'\ABio7.mat'])
+load([PM,'\BioSigs.mat'])
 
 alpha=5;
 d1=6;

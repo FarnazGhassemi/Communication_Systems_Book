@@ -34,9 +34,6 @@ filt_sig_new=filt_sig;
 
 %------------------------ Adding his own EOG, Other one EOG and simulated EOG ------------------------------
 PM=cd;
-load([PM,'\ABio7.mat'])
-
-
 
 ind_Art={281.3*200:285*200,651*200:652*200,160*200:163*200,697.5*200:699.2*200};% periods of good artifacts of his own, especially EOG
 
