@@ -92,10 +92,10 @@ grid on
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           Inteference                                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-n1=0.3;
-n2=1;
-Int1 =n1*benchcicbar(6,1:1500);
-Int2 =n2*benchcicbar(6,1:1500);
+n1=1;
+n2=8;
+Int1 =n1*benchcicbar(5,1:1500);
+Int2 =n2*benchcicbar(5,1:1500);
 figure;
 subplot(4,1,1)
 plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
@@ -104,8 +104,8 @@ hold on
 ylim([-3, 9])
 grid on
 subplot(4,1,2)
-plot(benchcicbar(6,1:1500),'Color', colors(3,:),'LineWidth', 2)
-title('Breathing Signal')
+plot(benchcicbar(5,1:1500),'Color', colors(3,:),'LineWidth', 2)
+title('Respiratory Artifact')
 hold on
 ylim([-2.5, 2])
 grid on
@@ -114,13 +114,13 @@ subplot(4,1,3)
 plot(benchcicbar(4,1:1500)+Int1,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal + Low Interfernce of Breathing signal'])
 hold on
-ylim([-3, 9])
+ylim([-5, 10])
 grid on
 subplot(4,1,4)
 plot(benchcicbar(4,1:1500)+Int2,'Color', colors(5,:),'LineWidth', 2)
 title(['ECG Signal + High Interfernce of Breathing signal'])
 hold on
-ylim([-3, 9])
+ylim([-15, 20])
 grid on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
