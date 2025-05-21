@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 3-3:               %
+%                   Illustrating Simulation 3-5:               %
 %     Types of Adverse Effects of Channel On Message Signal    %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 3-Section 3                      %
+%                     Chapter 3-Section 5                      %
 %                                                              %
 %                                                              %
 %   Version.2:             03/09/27---Dr.Ghassemi              %

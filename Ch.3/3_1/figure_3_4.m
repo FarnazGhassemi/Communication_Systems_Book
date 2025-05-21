@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Figure 3-6:                  %
+%                   Illustrating Figure 3-4:                  %
 %     Types of Adverse Effects of Channel On Message Signal    %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
