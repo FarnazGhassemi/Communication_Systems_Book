@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %         Illustrating Chapter 4 Amplitude Modulation :        %
-%                                        Mixer                 %
+%                                 DSB Modulation               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
@@ -58,7 +58,7 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              Mixer                                      %
+%                              DSB Modulation                                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 t0=3;                               	% signal duration
@@ -85,9 +85,9 @@ C = fftshift(fft(c) / length(c));       % Fourier transform
 
 
 
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+% DSB Modulated signal
+u=(m_n).*c;                       % DSB Modulated signal
+U = fftshift(fft(u) / length(u));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
@@ -125,14 +125,14 @@ ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 3: Mixed Signal
+% Figure 3: DSB Modulated Signal
 figure
 subplot(2,1,1)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 %axis([0 t0 -2 2])
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title('The DSB Modulated signal')
 grid on
 hold on
 %plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
@@ -163,7 +163,7 @@ subplot(3,1,3)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title('The DSB Modulated Signal')
 grid on
 hold on
 % plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
@@ -192,7 +192,7 @@ plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Mixed Signal')
+title('The DSB Modulated Signal')
 grid on
 hold on
 
@@ -210,9 +210,9 @@ fc=30;                              	% carrier frequency
 c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
 
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+% DSB Modulated signal
+u=(m_n).*c;                       % DSB Modulated signal
+U = fftshift(fft(u) / length(u));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
@@ -250,14 +250,14 @@ ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 8: Mixed Signal
+% Figure 8: DSB Modulated Signal
 figure
 subplot(2,1,1)
 plot(t,u(1:length(t)),'Color', colors(3,:),'LineWidth', 2)
 %axis([0 t0 -2 2])
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title('The DSB Modulated signal')
 grid on
 hold on
 %plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
@@ -288,7 +288,7 @@ subplot(3,1,3)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title('The DSB Modulated Signal')
 grid on
 hold on
 % plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
@@ -317,7 +317,7 @@ plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Mixed Signal')
+title('The DSB Modulated Signal')
 grid on
 hold on
 

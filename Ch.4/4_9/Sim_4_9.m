@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %         Illustrating Chapter 4 Amplitude Modulation :        %
-%                                        Mixer                 %
+%                                 SSB Modulation               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
@@ -58,7 +58,7 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              Mixer                                      %
+%                              SSB Modulation                                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 t0=3;                               	% signal duration
@@ -82,12 +82,14 @@ f = linspace(-fs/2, fs/2, length(M));	% frequency vector
 fc=15;                              	% carrier frequency
 c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
+s=sin(2*pi*fc.*t);                   	% carrier signal
 
 
-
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+% SSB Modulated signal
+u1=(m_n).*c/2-imag(hilbert(m_n)).*s/2;    % USSB Modulated signal
+U1 = fftshift(fft(u1) / length(u1));      % Fourier transform 
+u2=(m_n).*c/2+imag(hilbert(m_n)).*s/2;    % USSB Modulated signal
+U2 = fftshift(fft(u2) / length(u2));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
@@ -125,76 +127,86 @@ ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 3: Mixed Signal
+% Figure 3: USSB Modulated Signal
 figure
 subplot(2,1,1)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
+plot(t,u1,'Color', colors(3,:),'LineWidth', 2)
 %axis([0 t0 -2 2])
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title('The USSB Modulated signal')
 grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
+plot(f,abs(U1),'Color', colors(3,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
 
-% Figure 4: Time Signals
+% Figure 4: LSSB Modulated Signal
 figure
-subplot(3,1,1)
+subplot(2,1,1)
+plot(t,u2,'Color', colors(6,:),'LineWidth', 2)
+%axis([0 t0 -2 2])
+xlabel('Time')
+ylabel('Amplitude')
+title('The LSSB Modulated signals')
+grid on
+subplot(2,1,2)
+plot(f,abs(U2),'Color', colors(6,:),'LineWidth', 2) 
+xlabel('Frequency')
+ylabel('Magnitude')
+%title('Spectrum of the message signal')
+xlim([-fp fp])
+grid on
+
+
+% Figure 5: Time Signals
+figure
+subplot(4,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
 title('The Message Signal') 
 grid on
-subplot(3,1,2)
+subplot(4,1,2)
 plot(t,c,'Color', colors(4,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
 title('The Carrier Signal') 
 grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
+subplot(4,1,3)
+plot(t,u1,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title('The USSB Signal')
 grid on
-hold on
+subplot(4,1,4)
+plot(t,u2,'Color', colors(6,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title('The LSSB Signal')
+grid on
+%hold on
 % plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
 % plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 % legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
 
-% Figure 5: Frequency Signals
+% Figure 6: Frequency Signals
 figure
-subplot(3,1,1)
+subplot(4,1,1)
 plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The Message Signal'); grid on
+subplot(4,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
-
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Mixed Signal')
-grid on
-hold on
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The Carrier Signal'); grid on
+subplot(4,1,3)
+plot(f,abs(U1),'Color', colors(3,:),'LineWidth', 2) 
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The USSB Signal'); grid on
+subplot(4,1,4)
+plot(f,abs(U2),'Color', colors(6,:),'LineWidth', 2) 
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The LSSB Signal'); grid on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              MultiTone                                      %
@@ -205,21 +217,26 @@ m_n=(m-mean(m))/max(abs(m));            % normalized message signal
 M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
 f = linspace(-fs/2, fs/2, length(M));	% frequency vector
 
+
 % carrier signal
 fc=30;                              	% carrier frequency
 c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
+s=sin(2*pi*fc.*t);                   	% carrier signal
 
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+
+% SSB Modulated signal
+u1=(m_n).*c/2-imag(hilbert(m_n)).*s/2;    % USSB Modulated signal
+U1 = fftshift(fft(u1) / length(u1));      % Fourier transform 
+u2=(m_n).*c/2+imag(hilbert(m_n)).*s/2;    % USSB Modulated signal
+U2 = fftshift(fft(u2) / length(u2));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fp=(fc+fm3)*1.2;
 
-% Figure 6: Message Signal
+% Figure 1: Message Signal
 figure
 subplot(2,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
@@ -234,10 +251,10 @@ ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 7: Carrier Signal
+% Figure 2: Carrier Signal
 figure
 subplot(2,1,1)
-plot(t,c(1:length(t)),'Color', colors(4,:),'LineWidth', 2)
+plot(t,c,'Color', colors(4,:),'LineWidth', 2)
 %axis([0 t0 -1.2 1.2])
 xlabel('Time')
 ylabel('Amplitude')
@@ -250,91 +267,101 @@ ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 8: Mixed Signal
+% Figure 3: USSB Modulated Signal
 figure
 subplot(2,1,1)
-plot(t,u(1:length(t)),'Color', colors(3,:),'LineWidth', 2)
+plot(t,u1,'Color', colors(3,:),'LineWidth', 2)
 %axis([0 t0 -2 2])
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title('The USSB Modulated signal')
 grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
+plot(f,abs(U1),'Color', colors(3,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
 %title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
 
-% Figure 9: Time Signals
+% Figure 4: LSSB Modulated Signal
 figure
-subplot(3,1,1)
+subplot(2,1,1)
+plot(t,u2,'Color', colors(6,:),'LineWidth', 2)
+%axis([0 t0 -2 2])
+xlabel('Time')
+ylabel('Amplitude')
+title('The LSSB Modulated signals')
+grid on
+subplot(2,1,2)
+plot(f,abs(U2),'Color', colors(6,:),'LineWidth', 2) 
+xlabel('Frequency')
+ylabel('Magnitude')
+%title('Spectrum of the message signal')
+xlim([-fp fp])
+grid on
+
+
+% Figure 5: Time Signals
+figure
+subplot(4,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
 title('The Message Signal') 
 grid on
-subplot(3,1,2)
+subplot(4,1,2)
 plot(t,c,'Color', colors(4,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
 title('The Carrier Signal') 
 grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
+subplot(4,1,3)
+plot(t,u1,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title('The USSB Signal')
 grid on
-hold on
+subplot(4,1,4)
+plot(t,u2,'Color', colors(6,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title('The LSSB Signal')
+grid on
+%hold on
 % plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
 % plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 % legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
 
-% Figure 10: Frequency Signals
+% Figure 6: Frequency Signals
 figure
-subplot(3,1,1)
+subplot(4,1,1)
 plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The Message Signal'); grid on
+subplot(4,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The Carrier Signal'); grid on
+subplot(4,1,3)
+plot(f,abs(U1),'Color', colors(3,:),'LineWidth', 2) 
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The USSB Signal'); grid on
+subplot(4,1,4)
+plot(f,abs(U2),'Color', colors(6,:),'LineWidth', 2) 
+xlim([-fp fp]); xlabel('Frequency'); ylabel('Magnitude'); title('The LSSB Signal'); grid on
 
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Mixed Signal')
-grid on
-hold on
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  close(gcf)
-end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            Save Figures                                 %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PM=cd;
+% FolderName = [PM,'\PNG\']   % Your destination folder
+% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+% for iFig = 1:length(FigList)
+%   FigHandle = FigList(iFig);  
+%   FigName   = num2str(get(FigHandle, 'Number'))
+%   set(0, 'CurrentFigure', FigHandle);
+%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
+%   savefig(gcf, [FolderName, FigName, '.fig']);
+%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
+%   close(gcf)
+% end
 

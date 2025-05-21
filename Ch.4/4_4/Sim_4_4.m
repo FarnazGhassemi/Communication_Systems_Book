@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %         Illustrating Chapter 4 Amplitude Modulation :        %
-%                                        Mixer                 %
+%                                 AM Modulation                %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
@@ -58,20 +58,36 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              Mixer                                      %
+%                                 IPG                                     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Message signal
+% Load IPG Signal
+load('IP.mat');  % Contains 'IPG' (time-domain signal)
+m=IP;
+fs = 450;         % Sampling frequency
 
-t0=3;                               	% signal duration
-ts=0.001;                            	% sampling interval
-fs=1/ts;                             	% sampling frequency
-t=[0:ts:t0];                         	% time vector
-df=0.2;                              	% required frequency resolution
+Ts = 1/fs;        % Sampling interval
+% t = (0:length(PPG)-1) * Ts;  % Time vector
+
+% Limit to first 3 seconds
+t0 = 3;
+N = min(length(m), t0 * fs);
+t = (0:N-1) /fs;
+m = m(1:N);
+
+% Upsampling factor
+upsample_factor = 1;
+new_fs = fs * upsample_factor;  % New sampling frequency
+new_Ts = 1 / new_fs;            % New sampling interval
+new_t = 0:new_Ts:(t(end));      % New time vector
+
+% Interpolation (spline for smooth curve)
+m = interp1(t, m, new_t, 'spline');
 
 
+t=new_t;
+fs=new_fs;
 
-% message signal
-fm=2;
-m=8*cos(2*pi*fm*t);                     % Message signal
 m_n=(m-mean(m))/max(abs(m));            % normalized message signal
 M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
 f = linspace(-fs/2, fs/2, length(M));	% frequency vector
@@ -79,20 +95,22 @@ f = linspace(-fs/2, fs/2, length(M));	% frequency vector
 
 
 % carrier signal
-fc=15;                              	% carrier frequency
+fc=30;                              	% carrier frequency
 c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
 
 
 
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+% AM Modulated signal
+mu=0.85;                               % AM Modulation Index
+u=(1+mu*m_n).*c;                       % AM Modulated signal
+U = fftshift(fft(u) / length(u));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+fm)*1.2;
+fp=(fc)*1.2;
+BioSig_Type='IPG';
 
 % Figure 1: Message Signal
 figure
@@ -100,20 +118,19 @@ subplot(2,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The message signal')
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(2,1,2)
 plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
+
 % Figure 2: Carrier Signal
 figure
 subplot(2,1,1)
 plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
 xlabel('Time')
 ylabel('Amplitude')
 title('The carrier signal') 
@@ -122,26 +139,22 @@ subplot(2,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 3: Mixed Signal
+
+% Figure 3: AM Modulated Signal
 figure
 subplot(2,1,1)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
 hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 subplot(2,1,2)
 plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
 
@@ -151,7 +164,7 @@ subplot(3,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Message Signal') 
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(3,1,2)
 plot(t,c,'Color', colors(4,:),'LineWidth', 2)
@@ -163,12 +176,9 @@ subplot(3,1,3)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
 hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
 
 % Figure 5: Frequency Signals
 figure
@@ -177,7 +187,7 @@ plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Message Signal') 
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(3,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
@@ -192,53 +202,78 @@ plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Mixed Signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
-hold on
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                 ECG                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load Message Signal
+load('ECG.mat');  % Contains 'ECG' (time-domain signal)
+fs = 150;         % Sampling frequency
+Ts = 1/fs;        % Sampling interval
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              MultiTone                                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fm1=2;fm2=5;fm3=7;
-m=8*cos(2*pi*fm1*t)+4*cos(2*pi*fm2*t)+10*cos(2*pi*fm3*t);
+% Limit to first 3 seconds
+t0 = 3;
+N = min(length(m), t0 * fs);
+t = (0:N-1) /fs;
+m = ECG(1:N);
+
+% Upsampling factor
+upsample_factor = 10;
+new_fs = fs * upsample_factor;  % New sampling frequency
+new_Ts = 1 / new_fs;            % New sampling interval
+new_t = 0:new_Ts:(t(end));      % New time vector
+
+% Interpolation (spline for smooth curve)
+m = interp1(t, m, new_t, 'spline');
+
+
+t=new_t;
+fs=new_fs;
+
 m_n=(m-mean(m))/max(abs(m));            % normalized message signal
 M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
 f = linspace(-fs/2, fs/2, length(M));	% frequency vector
 
+
+
 % carrier signal
-fc=30;                              	% carrier frequency
+fc=500;                              	% carrier frequency
 c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
 
-% mixed signal
-u=m_n.*c;                     	        % mixed signal
-U = fftshift(fft(u) / length(u));   % Fourier transform 
+
+
+% AM Modulated signal
+mu=0.85;                               % AM Modulation Index
+u=(1+mu*m_n).*c;                       % AM Modulated signal
+U = fftshift(fft(u) / length(u));      % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            Plot Figures                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+fm3)*1.2;
+fp=(fc)*1.2;
+BioSig_Type='ECG';
 
-% Figure 6: Message Signal
+% Figure 1: Message Signal
 figure
 subplot(2,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The message signal')
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(2,1,2)
 plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 7: Carrier Signal
+
+% Figure 2: Carrier Signal
 figure
 subplot(2,1,1)
-plot(t,c(1:length(t)),'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
+plot(t,c,'Color', colors(4,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
 title('The carrier signal') 
@@ -247,36 +282,32 @@ subplot(2,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
-% Figure 8: Mixed Signal
+
+% Figure 3: AM Modulated Signal
 figure
 subplot(2,1,1)
-plot(t,u(1:length(t)),'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
+plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The mixed signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
 hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
 subplot(2,1,2)
 plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
 xlabel('Frequency')
 ylabel('Magnitude')
-%title('Spectrum of the message signal')
 xlim([-fp fp])
 grid on
 
-% Figure 9: Time Signals
+% Figure 4: Time Signals
 figure
 subplot(3,1,1)
 plot(t,m,'Color', colors(2,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Message Signal') 
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(3,1,2)
 plot(t,c,'Color', colors(4,:),'LineWidth', 2)
@@ -288,21 +319,18 @@ subplot(3,1,3)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The Mixed Signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
 hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
 
-% Figure 10: Frequency Signals
+% Figure 5: Frequency Signals
 figure
 subplot(3,1,1)
 plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Message Signal') 
+title(['The message signal - (',BioSig_Type,')'])
 grid on
 subplot(3,1,2)
 plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
@@ -317,24 +345,166 @@ plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The Mixed Signal')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
+grid on
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                 PPG                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load Message Signal
+load('PPG.mat');  % Contains 'ECG' (time-domain signal)
+fs = 150;         % Sampling frequency
+Ts = 1/fs;        % Sampling interval
+
+% Limit to first 3 seconds
+t0 = 3;
+N = min(length(m), t0 * fs);
+t = (0:N-1) /fs;
+m = PPG(1:N);
+
+% Upsampling factor
+upsample_factor = 3;
+new_fs = fs * upsample_factor;  % New sampling frequency
+new_Ts = 1 / new_fs;            % New sampling interval
+new_t = 0:new_Ts:(t(end));      % New time vector
+
+% Interpolation (spline for smooth curve)
+m = interp1(t, m, new_t, 'spline');
+
+
+t=new_t;
+fs=new_fs;
+
+m_n=(m-mean(m))/max(abs(m));            % normalized message signal
+M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
+f = linspace(-fs/2, fs/2, length(M));	% frequency vector
+
+
+
+% carrier signal
+fc=100;                              	% carrier frequency
+c=cos(2*pi*fc.*t);                   	% carrier signal
+C = fftshift(fft(c) / length(c));       % Fourier transform 
+
+
+
+% AM Modulated signal
+mu=0.85;                               % AM Modulation Index
+u=(1+mu*m_n).*c;                       % AM Modulated signal
+U = fftshift(fft(u) / length(u));      % Fourier transform 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                            Plot Figures                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fp=(fc)*1.2;
+BioSig_Type='PPG';
+
+% Figure 1: Message Signal
+figure
+subplot(2,1,1)
+plot(t,m,'Color', colors(2,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title(['The message signal - (',BioSig_Type,')'])
+grid on
+subplot(2,1,2)
+plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
+xlabel('Frequency')
+ylabel('Magnitude')
+xlim([-fp fp])
+grid on
+
+% Figure 2: Carrier Signal
+figure
+subplot(2,1,1)
+plot(t,c,'Color', colors(4,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title('The carrier signal') 
+grid on
+subplot(2,1,2)
+plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
+xlabel('Frequency')
+ylabel('Magnitude')
+xlim([-fp fp])
+grid on
+
+% Figure 3: AM Modulated Signal
+figure
+subplot(2,1,1)
+plot(t,u,'Color', colors(3,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
+grid on
+hold on
+subplot(2,1,2)
+plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
+xlabel('Frequency')
+ylabel('Magnitude')
+xlim([-fp fp])
+grid on
+
+% Figure 4: Time Signals
+figure
+subplot(3,1,1)
+plot(t,m,'Color', colors(2,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title(['The message signal - (',BioSig_Type,')'])
+grid on
+subplot(3,1,2)
+plot(t,c,'Color', colors(4,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title('The Carrier Signal') 
+grid on
+subplot(3,1,3)
+plot(t,u,'Color', colors(3,:),'LineWidth', 2)
+xlabel('Time')
+ylabel('Amplitude')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
 grid on
 hold on
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  close(gcf)
-end
+% Figure 5: Frequency Signals
+figure
+subplot(3,1,1)
+plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
+xlim([-fp fp])
+xlabel('Frequency')
+ylabel('Magnitude')
+title(['The message signal - (',BioSig_Type,')'])
+grid on
+subplot(3,1,2)
+plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
+xlim([-fp fp])
+
+xlabel('Frequency')
+ylabel('Magnitude')
+title('The Carrier Signal') 
+grid on
+subplot(3,1,3)
+plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
+xlim([-fp fp])
+xlabel('Frequency')
+ylabel('Magnitude')
+title(['The AM Modulated signal- (',BioSig_Type,')'])
+grid on
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            Save Figures                                 %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PM=cd;
+% FolderName = [PM,'\PNG_2\']   % Your destination folder
+% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+% for iFig = 1:length(FigList)
+%   FigHandle = FigList(iFig);
+%   FigName   = num2str(get(FigHandle, 'Number'))
+%   set(0, 'CurrentFigure', FigHandle);
+%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
+%   savefig(gcf, [FolderName, FigName, '.fig']);
+%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
+%   close(gcf)
+% end
 
