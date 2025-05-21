@@ -62,7 +62,7 @@ set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 PM=cd;
-load([PM,'\BioSigs.mat'])
+load([PM,'\ECG_Sample.mat'])
 
 alpha=5;
 d1=6;
@@ -71,19 +71,51 @@ l1=1/10^(d1*alpha/10);
 l2=1/10^(d2*alpha/10);
 figure;
 subplot(3,1,1)
-plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,2)
-plot(benchcicbar(4,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
+plot(data(1,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
 title(['ECG Signal-Attenuated with ',num2str(d1),'m cable(\alpha=5)'])
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,3)
-plot(benchcicbar(4,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
+plot(data(1,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
+title(['ECG Signal-Attenuated with ',num2str(d2),'m cable(\alpha=5)'])
+ylim([-3, 9])
+hold on
+grid on
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           Distortion                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+PM=cd;
+load([PM,'\ECG_Sample.mat'])
+
+alpha=5;
+d1=6;
+d2=d1*2;
+l1=1/10^(d1*alpha/10);
+l2=1/10^(d2*alpha/10);
+figure;
+subplot(3,1,1)
+plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
+title('Original ECG Signal')
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,2)
+plot(data(1,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
+title(['ECG Signal-Attenuated with ',num2str(d1),'m cable(\alpha=5)'])
+hold on
+ylim([-3, 9])
+grid on
+subplot(3,1,3)
+plot(data(1,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal-Attenuated with ',num2str(d2),'m cable(\alpha=5)'])
 ylim([-3, 9])
 hold on
@@ -92,32 +124,33 @@ grid on
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           Inteference                                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+load('Breath_Sample.mat')
 n1=1;
 n2=8;
-Int1 =n1*benchcicbar(5,1:1500);
-Int2 =n2*benchcicbar(5,1:1500);
+Int1 =n1*data2(1,1:1500);
+Int2 =n2*data2(1,1:1500);
 figure;
 subplot(4,1,1)
-plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
 hold on
 ylim([-3, 9])
 grid on
 subplot(4,1,2)
-plot(benchcicbar(5,1:1500),'Color', colors(3,:),'LineWidth', 2)
+plot(data2(1,1:1500),'Color', colors(3,:),'LineWidth', 2)
 title('Respiratory Artifact')
 hold on
 ylim([-2.5, 2])
 grid on
 
 subplot(4,1,3)
-plot(benchcicbar(4,1:1500)+Int1,'Color', colors(4,:),'LineWidth', 2)
+plot(data(1,1:1500)+Int1,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal + Low Interfernce of Breathing signal'])
 hold on
 ylim([-5, 10])
 grid on
 subplot(4,1,4)
-plot(benchcicbar(4,1:1500)+Int2,'Color', colors(5,:),'LineWidth', 2)
+plot(data(1,1:1500)+Int2,'Color', colors(5,:),'LineWidth', 2)
 title(['ECG Signal + High Interfernce of Breathing signal'])
 hold on
 ylim([-15, 20])
@@ -132,19 +165,19 @@ noise1 = wgn( 1, 1500 , n1 );
 noise2 = wgn( 1, 1500 , n2 );
 figure;
 subplot(3,1,1)
-plot(benchcicbar(4,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,2)
-plot(benchcicbar(4,1:1500)+noise1,'Color', colors(3,:),'LineWidth', 2)
+plot(data(1,1:1500)+noise1,'Color', colors(3,:),'LineWidth', 2)
 title(['ECG Signal + Noise(',num2str(n1),'dBW)'])
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,3)
-plot(benchcicbar(4,1:1500)+noise2,'Color', colors(4,:),'LineWidth', 2)
+plot(data(1,1:1500)+noise2,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal + Noise(',num2str(n2),'dBW)'])
 hold on
 ylim([-3, 9])
