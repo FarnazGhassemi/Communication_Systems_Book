@@ -576,20 +576,20 @@ xlabel('Frequency')
 ylabel('Magnitude')
 title('The LSSB Signal')
 grid on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG_2\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  % close(gcf)
-end
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            Save Figures                                 %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PM=cd;
+% FolderName = [PM,'\PNG_2\']   % Your destination folder
+% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+% for iFig = 1:length(FigList)
+%   FigHandle = FigList(iFig);
+%   FigName   = num2str(get(FigHandle, 'Number'))
+%   set(0, 'CurrentFigure', FigHandle);
+%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
+%   savefig(gcf, [FolderName, FigName, '.fig']);
+%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
+%   % close(gcf)
+% end
 
