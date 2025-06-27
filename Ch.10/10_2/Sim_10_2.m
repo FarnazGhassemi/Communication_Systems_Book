@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 10-1:              %
+%                   Illustrating Simulation 10-2:              %
 %           Entropy of Biosignals comparing to noise           %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
@@ -9,7 +9,7 @@
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = digital_modulation(varargin)
+function varargout = Sim_10_2(varargin)
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
