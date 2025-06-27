@@ -42,7 +42,7 @@
 %   
 %%---------------------------------------------------------------
 %%
-classdef matched_filter_gui < matlab.apps.AppBase
+classdef Sim_10_1 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
@@ -393,7 +393,7 @@ classdef matched_filter_gui < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = matched_filter_gui
+        function app = Sim_10_1
 
             % Create UIFigure and components
             createComponents(app)
