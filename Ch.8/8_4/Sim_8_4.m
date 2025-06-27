@@ -62,7 +62,7 @@
 %%---------------------------------------------------------------
 %%
 
-classdef Telecommunaications_GUI < matlab.apps.AppBase
+classdef Sim_8_4 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
@@ -335,7 +335,7 @@ classdef Telecommunaications_GUI < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = Telecommunaications_GUI
+        function app = Sim_8_4
 
             % Create UIFigure and components
             createComponents(app)
