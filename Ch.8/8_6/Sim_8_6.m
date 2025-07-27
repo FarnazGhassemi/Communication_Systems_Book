@@ -1,62 +1,180 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Shannon-Fano Encoding and Decoding for Text Compression    %
+%                   Illustrating Simulation 9-6:               %
+%                PWM Modulation for Biomedical Signal          %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 8                           %
+%                     Chapter 9-Section                        %
 %                                                              %
-%                                                              %
-%   Version.1:             03/03/30                            %
-%   The first version Contributed voluntarily by               %
-%   Khaleghi.                                                  %
+%   Version.3:             04/02/27---Dr.Ghassemi              %
+%   Version.2:             03/09/03---Dr.Ghassemi              %
+%   Version.1:             96/06/30---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%------------------------- Discription ------------------------
-%%  This script implements Shannon-Fano encoding, a data compression 
-%    technique that assigns variable-length binary codes to characters 
-%    based on their frequency. It encodes a given input text, saves 
-%    the encoded string to a file, and decodes it back to the original 
-%    text using the generated codebook.
-%
-%   Functions :
-%       shanon_fano_encoding : Generates a codebook (character-to-binary mapping) 
-%        and the encoded string (coded_str).
-%       decode_shanon_fano : Decodes the encoded string (coded_str) back 
-%        to the original text using the generated codebook.
-
-%   Inputs:
-%       Reads a text file (input_text.txt) from the current directory.
-%   Outputs:
-%       Prints the character codes and the encoded string.
-%       Writes the encoded string to a new file (encoded_text.txt).
-%       Prints the decoded string to confirm it matches the original input.
 %%---------------------------------------------------------------
-%%
+close all;
+clear;
+clc;
+colors=[0,0,0;                       %1-Black
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;      %5-Purple
+        225/255,124/255,5/255;       %6-Orange
+        56/255,166/255,165/255;      %7-Light Blue
+        204/255,80/255,62/255;       %8-Light Red
+        115/255,175/255,72/255;      %9-Light Green
+        237/255,173/255,8/255;       %10-Light Orange
+        148/255,52/255,110/255;      %11-Light Purple
+        70/255,0,114/255;            %12-Dark Blue
+        0,0.5,0.25                   %13-Green
+        ];
+grayColor = [0.5, 0.5, 0.5];
+marks={'-';'--';':';'-.'};
 
-% Read input string from a text file in the current directory
-file_name = 'input_text.txt';
-input_str = fileread(file_name);
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
-% Encode the input string using Shanon-Fano encoding
-[codebook, coded_str] = shanon_fano_encoding(input_str);
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
 
-% Display the coded symbols
-disp('Character codes:');
-keys = codebook.keys;
-for i = 1:length(keys)
-    fprintf('%c: %s\n', keys{i}, codebook(keys{i}));
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
+
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
+
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
+
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+%%---------------------------------------------------------------
+%% Load signal
+load('IP.mat'); 
+fs = 125;       % Sampling frequency
+IP=IP(1:10*fs);
+t = (0:length(IP)-1)/fs;
+t1=t;
+%% Ask user for PWM rate (sampling of input signal for modulation)
+pwm_rate = input('Enter the PWM rate (in samples/sec, e.g., 10): ');
+Ts = 1/pwm_rate;
+samples_per_symbol = round(fs * Ts);  % Samples per PWM pulse
+n_symbols = floor(length(IP) / samples_per_symbol);
+IP_sampled = IP(1:n_symbols * samples_per_symbol); % Trim
+t = t(1:length(IP_sampled));
+% Normalize signal to [0, 1]
+IP_norm = (IP - min(IP)) / (max(IP) - min(IP));
+%% Ask user whether to add channel noise
+add_noise = input('Do you want to add channel noise? (y/n): ', 's');
+add_noise = lower(add_noise); % Case insensitive
+
+if add_noise == 'y'
+    snr_dB = input('Enter SNR for the channel (in dB, e.g., 20): ');
+    noise_enabled = true;
+else
+    noise_enabled = false;
 end
 
-% Display the coded string
-disp(['Coded string: ' coded_str]);
+%% Generate PWM signal
+pwm_signal = zeros(1, length(IP));
+for k = 1:n_symbols
+    idx_start = (k-1)*samples_per_symbol + 1;
+    idx_end = idx_start + samples_per_symbol - 1;
+    pulse_width = round(IP_norm(idx_start) * samples_per_symbol);
+    pwm_signal(idx_start : idx_start + pulse_width - 1) = 1;
+    pwm_signal(idx_start + pulse_width : idx_end) = 0;
+end
 
-% Write the encoded string to a text file
-encoded_file_name = 'encoded_text.txt';
-fid = fopen(encoded_file_name, 'w');
-fprintf(fid, '%s', coded_str);
-fclose(fid);
+%% Optional: Add noise
+if noise_enabled
+    signal_power = mean(pwm_signal.^2);
+    snr_linear = 10^(snr_dB/10);
+    noise_power = signal_power / snr_linear;
+    noise = sqrt(noise_power) * randn(size(pwm_signal));
+    pwm_noisy = pwm_signal + noise;
+else
+    pwm_noisy = pwm_signal;
+end
 
-% Decode the coded string using the generated codebook
-decoded_str = decode_shanon_fano(coded_str, codebook);
+%% PWM reconstruction
+threshold = 0.5;
+pwm_bin = pwm_signal > threshold;
+% Detect rising and falling edges
+edges = diff([0 pwm_bin 0]);
+start_indices = find(edges == 1);
+end_indices = find(edges == -1);
 
-% Display the decoded string
-disp(['Decoded string: ' decoded_str]);
+n_pulses = min(length(start_indices), length(end_indices));
+amplitudes = zeros(1, n_pulses);
+pulse_times = zeros(1, n_pulses);
+max_width = samples_per_symbol;
+
+for i = 1:n_pulses
+    width = end_indices(i) - start_indices(i);
+    amplitudes(i) = min(width / max_width, 1); % Ensure max=1
+    pulse_times(i) = (start_indices(i) + end_indices(i)) / 2 / fs;
+end
+
+% Interpolate to match original time
+reconstructed = interp1(pulse_times, amplitudes, t, 'linear', 'extrap');
+reconstructed = reconstructed * (max(IP) - min(IP)) + min(IP); % Denormalize
+
+%% Plotting
+figure;
+tlim = [0 t(end)];
+plot(t1, IP, 'Color', colors(2,:), 'LineWidth', 2);
+title('Original Signal');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+xlim(tlim);
+figure
+if noise_enabled
+    subplot(3,1,1);
+    plot(t1, pwm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PWM Modulated Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,2);
+    plot(t1, pwm_noisy, 'Color', colors(5,:), 'LineWidth', 2);
+    if noise_enabled
+        title(['Noisy PWM Signal (SNR = ' num2str(snr_dB) ' dB)']);
+    else
+        title('PWM Signal (No Noise)');
+    end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,3);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t1, IP, 'Color', colors(2,:), 'LineWidth', 1.5);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+else
+    subplot(2,1,1);
+    plot(t1, pwm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PWM Modulated Signal (No Noise)');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+      
+    subplot(2,1,2);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t1, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+end

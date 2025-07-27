@@ -1,104 +1,174 @@
-% Generate alpha values
-a = linspace(0, 1, 1000);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 9-7:               %
+%                PPM Modulation for Biomedical Signal          %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 9-Section                        %
+%                                                              %
+%   Version.3:             04/02/27---Dr.Ghassemi              %
+%   Version.2:             03/09/03---Dr.Ghassemi              %
+%   Version.1:             96/06/30---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%---------------------------------------------------------------
 
-% Compute entropy function
-H = -(a.*log2(a)+(1-a).*log2(1-a));
-
-% Handle NaNs caused by log2(0)
-H(isnan(H)) = 0;
-
-%% new figure
-% Plot
-figure;
-hold on;
-
-%% axis
-ylim([-0.1, 1.2]);
-xlim([-0.1, 1.2]); 
-
-% Define the gray color for the axes and arrowheads
+close all;
+clear;
+clc;
+colors=[0,0,0;                       %1-Black
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;      %5-Purple
+        225/255,124/255,5/255;       %6-Orange
+        56/255,166/255,165/255;      %7-Light Blue
+        204/255,80/255,62/255;       %8-Light Red
+        115/255,175/255,72/255;      %9-Light Green
+        237/255,173/255,8/255;       %10-Light Orange
+        148/255,52/255,110/255;      %11-Light Purple
+        70/255,0,114/255;            %12-Dark Blue
+        0,0.5,0.25                   %13-Green
+        ];
 grayColor = [0.5, 0.5, 0.5];
+marks={'-';'--';':';'-.'};
 
-% Plot the vertical line (Y Axis)
-x_shaft = [0, 0]; % x-coordinates
-y_shaft = [0, 1.1]; % y-coordinates
-plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
-% Plot the triangular arrowhead for the vertical axis
-arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
-arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
-p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
-p.EdgeColor = grayColor;
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
 
-% Plot the horizontal line (X Axis)
-x_shaft1 = [0, 1.1]; % x-coordinates
-y_shaft1 = [0, 0]; % y-coordinates
-plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
 
-% Plot the triangular arrowhead for the horizontal axis
-arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
-arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
-p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
-p1.EdgeColor = grayColor;
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
 
-%% plot
-plot(a, H, 'b', 'LineWidth', 2.25);       % Entropy function
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
 
-% Add vertical line at alpha = 0.5 from y = 0 to y = 1
-line([0.5 0.5], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+%%---------------------------------------------------------------
+%% Load biomedical signal
+load('IP.mat');
+fs = 125;       % Sampling frequency
+t0=10;           % Signal Selected Time in Seconds
+IP=IP(1:t0*fs);
+t = (0:length(IP)-1)/fs;
 
-% Add horizontal line at H = 1 from alpha = 0 to 0.5
-line([0 0.5], [1 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+%% User Input
+ppm_rate = input('Enter PPM rate (Hz, e.g., 10): ');
+Ts = 1/ppm_rate;
+samples_per_slot = round(fs * Ts);
+n_slots = floor(length(IP) / samples_per_slot);
+IP_sampled = IP(1:n_slots * samples_per_slot); % Trim to full slots
+t = t(1:length(IP));
 
-% Labels and title
-xlabel('Symbol probability, \alpha');
-ylabel('H(\alpha)');
-title('Entropy function H(\alpha)');
+add_noise = input('Do you want to add channel noise? (y/n): ', 's');
+if lower(add_noise) == 'y'
+    snr_dB = input('Enter SNR (in dB, e.g., 20): ');
+    noise_enabled = true;
+else
+    noise_enabled = false;
+end
 
-% Legend and grid
-grid on;
+%% Normalize sampled signal to range [0, 1] for delay mapping
+IP_norm = (IP_sampled - min(IP_sampled)) / (max(IP_sampled) - min(IP_sampled));
 
-%% new figure
-% Plot
+% Time for full simulation
+ppm_signal = zeros(1, length(IP));
+delay_range = samples_per_slot - 1; % Maximum pulse delay per slot
+
+%% Generate PPM Signal
+for k = 1:n_slots
+    idx = (k-1)*samples_per_slot + 1;
+    sample_value = IP_norm(idx); % Use first sample in slot
+    delay = round(sample_value * delay_range); % Map to delay
+    pulse_index = idx + delay;
+    ppm_signal(pulse_index) = 1;
+end
+
+%% Add Channel Noise (optional)
+if noise_enabled
+    signal_power = mean(ppm_signal.^2);
+    snr_linear = 10^(snr_dB/10);
+    noise_power = signal_power / snr_linear;
+    noise = sqrt(noise_power) * randn(size(ppm_signal));
+    ppm_noisy = ppm_signal + noise;
+else
+    ppm_noisy = ppm_signal;
+end
+
+%% PPM Reconstruction
+recon = zeros(1, n_slots);
+
+for k = 1:n_slots
+    idx = (k-1)*samples_per_slot + 1;
+    [~, pulse_pos] = max(ppm_noisy(idx:idx+delay_range));
+    delay = pulse_pos - 1; % zero-based delay
+    amplitude = delay / delay_range;
+    recon(k) = amplitude;
+end
+
+% Interpolate to original time scale
+recon_time = (0:n_slots-1) * Ts;
+recon_full = interp1(recon_time, recon, t, 'linear');
+
+% Denormalize
+recon_full = recon_full * (max(IP) - min(IP)) + min(IP);
+
+%% Plotting
 figure;
-hold on;
-
-%% Axis
-ylim([-0.1, 1.2]);
-xlim([-0.1, 1.2]); 
-
-% Define the gray color for the axes and arrowheads
-grayColor = [0.5, 0.5, 0.5];
-
-% Plot the vertical line (Y Axis)
-x_shaft = [0, 0]; % x-coordinates
-y_shaft = [0, 1.1]; % y-coordinates
-plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
-
-% Plot the triangular arrowhead for the vertical axis
-arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
-arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
-p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
-p.EdgeColor = grayColor;
-
-% Plot the horizontal line (X Axis)
-x_shaft1 = [0, 1.1]; % x-coordinates
-y_shaft1 = [0, 0]; % y-coordinates
-plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
-
-% Plot the triangular arrowhead for the horizontal axis
-arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
-arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
-p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
-p1.EdgeColor = grayColor;
-
-%% plot
-plot(a, 1 - H, 'b', 'LineWidth', 2.25);       % Channel capacity
-
-% Labels and title
-xlabel('Transition probability \alpha');
-ylabel('Channel capacity C');
-title('Channel capacity C');
-
-% Legend and grid
-grid on;
+tlim = [0 t(end)];
+plot(t, IP, 'Color', colors(2,:), 'LineWidth', 2);
+title('Original Biomedical Signal'); xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
+figure
+if noise_enabled
+    subplot(3,1,1);
+    plot(t, ppm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PPM Modulated Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,2);
+    plot(t, ppm_noisy, 'Color', colors(5,:), 'LineWidth', 2);
+    if noise_enabled
+        title(['Noisy PPM Signal (SNR = ' num2str(snr_dB) ' dB)']);
+    else
+        title('PPM Signal (No Noise)');
+    end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
+    
+    subplot(3,1,3);
+    plot(t, recon_full, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
+else
+    subplot(2,1,1);
+    plot(t, ppm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PPM Modulated Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+      
+    subplot(2,1,2);
+    plot(t, recon_full, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
+end

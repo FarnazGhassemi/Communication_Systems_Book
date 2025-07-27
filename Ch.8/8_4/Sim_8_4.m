@@ -1,358 +1,186 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%              GUI for Morse Code Encoder/Decoder              %
-%             with Audio Playback and Visualization            %
+%                   Illustrating Simulation 9-4:               %
+%     Types of Adverse Effects of Channel On Message Signal    %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                  Chapter 8 -                                 %
+%                     Chapter 9-Section                        %
 %                                                              %
-%                                                              %
-%   Version.1:             03/03/30                            %
-%   The first version Contributed voluntarily by               %
-%   Sara Khamseh.                                              %
-%   Version.2:             04/01/27                            %
-%   The second version Contributed voluntarily by              %
-%   Fatemeh Yazdani.                                           %
+%   Version.3:             22/02/04---Dr.Ghassemi                                                          %
+%   Version.2:             03/09/03---Dr.Ghassemi              %
+%   Version.1:             96/06/30---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%------------------------- Discription ------------------------
-%%  This code generates a graphical user interface (GUI) designed to 
-%    encode and decode text into either Morse code or 5-bit Telegraph 
-%    code (Baudot-style). The app allows users to input text, Morse code, 
-%    or Telegraph code, convert between these formats, visualize the 
-%    code waveform, and play the corresponding code audio. 
-%    Users can also adjust the playback speed and select from different 
-%    waveform types (sine, sawtooth, or square) for sound generation.
-%
-%   Supported Formats:
-%       - Morse Code: Uses '.' and '-' (or '_') for dots and dashes.
-%          Letters are separated by spaces, words by '/'.
-%       - Telegraph Code: Encodes letters into 5-bit binary strings 
-%          where each character is encoded as: 
-%               start bit (0) + 5-bit Baudot code + two stop bits (11). 
-%          Aplphabets and space (00100) are supported. It returns 5 asterisks 
-%          if the binary code is unsupported.
-%
-%   Functions:
-%       encode: uses a binary tree and depth-first search to map each character 
-%           to Morse code.
-%       decode: traverses a binary Morse code tree from the root for each Morse sequence, 
-%           where a dot (.) moves left and a dash (-) moves right, to reconstruct 
-%           the original English character.
-%       telegraph_code: uses a fixed mapping of letters to 5-bit binary strings 
-%           based on the Baudot (ITA2) code in Letters mode.
-%       decode_telegraph: uses the inverse of the Baudot code mapping to convert 
-%           5-bit binary strings back into their corresponding letters.
-%       AudioMorse: generates audio signal corresponding to the Morse code.
-%        the dashes 
-%       AudioTelegraph: the Mark (bit 1) and Space (bit 0) states are represented by two 
-%        audio tones of which the frequencies do not share a comman factor. 
-%        1500 Hz for '1' (mark), 1670 Hz for '0' (space) (170 Hz shift).
-%
-%   GUI Components:
-%       EditField: fields for text, Morse code, or Telegraph code.
-%       DropDown: DropDown to select between "Encode" and "Decode Morse" or "Decode Telegraph" modes.
-%       Button (convert): Button to start encoding or decoding of input.
-%       DropDown: DropDown to select between "Display Morse" and "Display Telegraph" modes.
-%       DropDown (waveform): Dropdown to select the waveform type (sin, sawtooth, square) for audio generator.
-%       Slider (speed): Slider to set the speed for the audio playback.
-%       Button (Play Audio): Button to play the code sound.
-%       Button (Display Audio): Button to display the Audio lines.
-%       UIAxes (Audio Lines): Area for plotting the code waveform.
-%
 %%---------------------------------------------------------------
-%%
+close all;
+clear;
+clc;
+colors=[0,0,0;                       %1-Black
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;      %5-Purple
+        225/255,124/255,5/255;       %6-Orange
+        56/255,166/255,165/255;      %7-Light Blue
+        204/255,80/255,62/255;       %8-Light Red
+        115/255,175/255,72/255;      %9-Light Green
+        237/255,173/255,8/255;       %10-Light Orange
+        148/255,52/255,110/255;      %11-Light Purple
+        70/255,0,114/255;            %12-Dark Blue
+        0,0.5,0.25                   %13-Green
+        ];
+grayColor = [0.5, 0.5, 0.5];
+marks={'-';'--';':';'-.'};
 
-classdef Sim_8_4 < matlab.apps.AppBase
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
-    % Properties that correspond to app components
-    properties (Access = public)
-        UIFigure               matlab.ui.Figure
-        DisplayAudioButton     matlab.ui.control.Button
-        DisplayAudioDropDown   matlab.ui.control.DropDown
-        TelegraphLabel         matlab.ui.control.Label
-        MorseCodeLabel         matlab.ui.control.Label
-        TextLabel              matlab.ui.control.Label
-        EditField_Telegraph    matlab.ui.control.EditField
-        EditField_3Label       matlab.ui.control.Label
-        speedSlider            matlab.ui.control.Slider
-        speedSliderLabel       matlab.ui.control.Label
-        waveformDropDown       matlab.ui.control.DropDown
-        waveformDropDownLabel  matlab.ui.control.Label
-        ConvertButton          matlab.ui.control.Button
-        convertDropDown        matlab.ui.control.DropDown
-        PlayAudioButton        matlab.ui.control.Button
-        EditField_2            matlab.ui.control.EditField
-        EditField              matlab.ui.control.EditField
-        UIAxes                 matlab.ui.control.UIAxes
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
+
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
+
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
+
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
+
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+%%---------------------------------------------------------------
+%% Load signal
+load('IP.mat'); 
+fs = 125;       % Sampling frequency
+t0=10;           % Signal Selected Time in Seconds
+IP=IP(1:t0*fs);
+t = (0:length(IP)-1)/fs;
+
+%% Ask user for PAM rate
+pam_rate = input('Enter the PAM rate (in samples/sec, e.g., 5): ');
+Ts = 1/pam_rate; 
+t_pam = 0:Ts:t(end); 
+
+%% Ask user for modulation method
+fprintf('\nChoose PAM modulation method:\n');
+fprintf('1: Sample-and-Hold\n');
+fprintf('2: Sinc-Based PAM\n');
+method = input('Enter the number corresponding to your choice: ');
+
+%% Ask user whether to add channel noise
+add_noise = input('Do you want to add channel noise? (y/n): ', 's');
+add_noise = lower(add_noise); % make case-insensitive
+
+if add_noise == 'y'
+    snr_dB = input('Enter SNR for the channel (in dB, e.g., 20): ');
+    noise_enabled = true;
+else
+    noise_enabled = false;
+end
+
+%% Sample the signal at PAM instants
+IP_sampled = interp1(t, IP, t_pam, 'linear');
+
+switch method
+    case 1 % Sample-and-Hold
+        modulated = zeros(size(t));
+        for i = 1:length(t_pam)-1
+            idx = t >= t_pam(i) & t < t_pam(i+1);
+            modulated(idx) = IP_sampled(i);
+        end
+        modulated(t >= t_pam(end)) = IP_sampled(end);
+        
+    case 2 % Sinc-Based PAM
+        modulated = zeros(size(t));
+        for n = 1:length(IP_sampled)
+            modulated = modulated + IP_sampled(n) * sinc(pam_rate*(t - t_pam(n)));
+        end
+        
+    otherwise
+        error('Invalid method selected. Please enter 1 or 2.');
+end
+
+%% Add noise if enabled
+if noise_enabled
+    signal_power = mean(modulated.^2);
+    snr_linear = 10^(snr_dB/10);
+    noise_power = signal_power / snr_linear;
+    noise = sqrt(noise_power) * randn(size(modulated));
+    modulated_noisy = modulated + noise;
+else
+    modulated_noisy = modulated;
+end
+
+%% Reconstruct using low-pass filter
+fc = pam_rate / 2;  % Cutoff frequency
+[b, a] = butter(6, fc / (fs / 2));  % Normalized
+reconstructed = filtfilt(b, a, modulated_noisy);
+
+%% Plotting
+figure;
+tlim = [0 t(end)];
+plot(t, IP, 'Color', colors(2,:), 'LineWidth', 2);
+title('Original Signal');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+xlim(tlim);
+figure
+if noise_enabled   
+    subplot(3,1,1);
+    plot(t, modulated, 'Color', colors(3,:), 'LineWidth', 2);
+    if method == 1
+        title('PAM Modulated Signal (Before Noise) - Sample and Hold');
+    else
+        title('PAM Modulated Signal (Before Noise) - Sinc Based');
     end
-
-    % Callbacks that handle component events
-    methods (Access = private)
-
-        % Button pushed function: PlayAudioButton
-        function PlayAudioButtonPushed(app, event)
-            mode = app.DisplayAudioDropDown.Value;
-            switch mode
-                case "Display Morse"
-                    [MorseSound, ~] = AudioMorse(app.EditField_2.Value, app.waveformDropDown.Value);
-                    Audio = audioplayer(MorseSound, round(app.speedSlider.Value));
-                case "Display Telegraph"
-                    [TelegraphSound, ~] = AudioTelegraph(app.EditField_Telegraph.Value, app.waveformDropDown.Value);
-                    Audio = audioplayer(TelegraphSound, round(app.speedSlider.Value));
-            end
-            pause(0.25);
-            play(Audio)
-            while isplaying(Audio)
-                pause(0.00001);
-            end
-        end
-
-        % Button pushed function: ConvertButton
-        function ConvertButtonPushed(app, event)
-            mode = app.convertDropDown.Value;
-        
-            switch mode
-                case "Encode Text"
-                    inputText = upper(app.EditField.Value); % String input
-                    morseResult = encode(inputText);        % Convert to Morse
-                    codes = strings(1, length(inputText));  % Convert to Telegraph
-        
-                    for i = 1:length(inputText)
-                        codes(i) = "0" + telegraph_code(inputText(i)) + "11";
-                    end
-                    telegraphResult = join(codes, "");  % Start bit + data + two stop bits
-        
-                    app.EditField_2.Value = morseResult;
-                    app.EditField_Telegraph.Value = telegraphResult;
-        
-                case "Decode Morse"
-                    morseInput = app.EditField_2.Value;      % Morse input
-                    decodedText = decode(morseInput);        % Morse → String
-                    codes = strings(1, length(decodedText));  % Convert to Telegraph
-        
-                    for i = 1:length(decodedText)
-                        codes(i) = "0" + telegraph_code(decodedText(i)) + "11";
-                    end
-                    telegraphResult = join(codes, "");  % Start bit + data + two stop bits
-        
-                    app.EditField.Value = decodedText;
-                    app.EditField_Telegraph.Value = telegraphResult;
-        
-                case "Decode Telegraph"
-                    telegraphInput = app.EditField_Telegraph.Value;  % Telegraph input
-                    decodedText = decode_telegraph(telegraphInput);  % Telegraph → String
-                    morseResult = encode(decodedText);               % String → Morse
-        
-                    app.EditField.Value = decodedText;
-                    app.EditField_2.Value = morseResult;
-            end
-        end
-
-        % Value changed function: EditField_Telegraph, convertDropDown
-        function EditField_TelegraphValueChanged(app, event)
-            value = app.EditField_Telegraph.Value;
-        end
-
-        % Value changed function: DisplayAudioDropDown
-        function DisplayAudioDropDownValueChanged(app, event)
-            value = app.DisplayAudioDropDown.Value;
-        end
-
-        % Button pushed function: DisplayAudioButton
-        function DisplayAudioButtonPushed(app, event)
-            mode = app.DisplayAudioDropDown.Value;
-            switch mode
-                case "Display Morse"
-                    [Sound, ~] = AudioMorse(app.EditField_2.Value, app.waveformDropDown.Value);
-                case "Display Telegraph"
-                    [Sound, ~] = AudioTelegraph(app.EditField_Telegraph.Value, app.waveformDropDown.Value);
-            end
-            
-            plot(Sound, 'Parent', app.UIAxes);
-            ylim(app.UIAxes, [-inf inf]);
-            xlim(app.UIAxes, [0 length(Sound)]);
-        end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,2);
+    if noise_enabled
+        plot(t, modulated_noisy, 'Color', colors(5,:), 'LineWidth', 2);
+        title(['Noisy PAM Signal (SNR = ' num2str(snr_dB) ' dB)']);
+    else
+        plot(t, modulated_noisy, 'Color', colors(3,:), 'LineWidth', 2);
+        title('PAM Signal (No Noise)');
     end
-
-    % Component initialization
-    methods (Access = private)
-
-        % Create UIFigure and components
-        function createComponents(app)
-
-            % Create UIFigure and hide until all components are created
-            app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Color = [0.2824 0.4667 0.6];
-            app.UIFigure.Position = [100 100 696 480];
-            app.UIFigure.Name = 'MATLAB App';
-            app.UIFigure.Scrollable = 'on';
-
-            % Create UIAxes
-            app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, 'Audio Lines')
-            zlabel(app.UIAxes, 'Z')
-            app.UIAxes.FontName = 'Arial';
-            app.UIAxes.FontAngle = 'italic';
-            app.UIAxes.FontUnits = 'points';
-            app.UIAxes.Position = [91 36 299 195];
-
-            % Create EditField
-            app.EditField = uieditfield(app.UIFigure, 'text');
-            app.EditField.FontSize = 18;
-            app.EditField.Tooltip = {'Type text using alphabets and space between words.'};
-            app.EditField.Position = [37 387 452 47];
-            app.EditField.Value = 'SOS';
-
-            % Create EditField_2
-            app.EditField_2 = uieditfield(app.UIFigure, 'text');
-            app.EditField_2.FontSize = 18;
-            app.EditField_2.Tooltip = {'Type Morse code using ''.'', ''-'' or ''_'', using spaces between letters and ''/'' between words.'};
-            app.EditField_2.Position = [37 319 452 42];
-            app.EditField_2.Value = '... --- ...';
-
-            % Create PlayAudioButton
-            app.PlayAudioButton = uibutton(app.UIFigure, 'push');
-            app.PlayAudioButton.ButtonPushedFcn = createCallbackFcn(app, @PlayAudioButtonPushed, true);
-            app.PlayAudioButton.FontName = 'Arial';
-            app.PlayAudioButton.FontWeight = 'bold';
-            app.PlayAudioButton.FontAngle = 'italic';
-            app.PlayAudioButton.Position = [529 251 84 26];
-            app.PlayAudioButton.Text = 'Play Audio';
-
-            % Create convertDropDown
-            app.convertDropDown = uidropdown(app.UIFigure);
-            app.convertDropDown.Items = {'Encode Text', 'Decode Morse', 'Decode Telegraph'};
-            app.convertDropDown.ValueChangedFcn = createCallbackFcn(app, @EditField_TelegraphValueChanged, true);
-            app.convertDropDown.FontWeight = 'bold';
-            app.convertDropDown.FontAngle = 'italic';
-            app.convertDropDown.Position = [508 409 128 25];
-            app.convertDropDown.Value = 'Encode Text';
-
-            % Create ConvertButton
-            app.ConvertButton = uibutton(app.UIFigure, 'push');
-            app.ConvertButton.ButtonPushedFcn = createCallbackFcn(app, @ConvertButtonPushed, true);
-            app.ConvertButton.FontName = 'Arial';
-            app.ConvertButton.FontWeight = 'bold';
-            app.ConvertButton.FontAngle = 'italic';
-            app.ConvertButton.Position = [537 371 67 26];
-            app.ConvertButton.Text = 'Convert';
-
-            % Create waveformDropDownLabel
-            app.waveformDropDownLabel = uilabel(app.UIFigure);
-            app.waveformDropDownLabel.HorizontalAlignment = 'right';
-            app.waveformDropDownLabel.FontSize = 14;
-            app.waveformDropDownLabel.FontWeight = 'bold';
-            app.waveformDropDownLabel.FontAngle = 'italic';
-            app.waveformDropDownLabel.Position = [483 209 71 22];
-            app.waveformDropDownLabel.Text = 'waveform';
-
-            % Create waveformDropDown
-            app.waveformDropDown = uidropdown(app.UIFigure);
-            app.waveformDropDown.Items = {'sin', 'sawtooth', 'square'};
-            app.waveformDropDown.FontWeight = 'bold';
-            app.waveformDropDown.FontAngle = 'italic';
-            app.waveformDropDown.Position = [482 186 83 22];
-            app.waveformDropDown.Value = 'sin';
-
-            % Create speedSliderLabel
-            app.speedSliderLabel = uilabel(app.UIFigure);
-            app.speedSliderLabel.HorizontalAlignment = 'right';
-            app.speedSliderLabel.FontWeight = 'bold';
-            app.speedSliderLabel.FontAngle = 'italic';
-            app.speedSliderLabel.Position = [445 61 39 22];
-            app.speedSliderLabel.Text = 'speed';
-
-            % Create speedSlider
-            app.speedSlider = uislider(app.UIFigure);
-            app.speedSlider.Limits = [5000 30000];
-            app.speedSlider.MajorTicks = [10000 20000 30000];
-            app.speedSlider.Orientation = 'vertical';
-            app.speedSlider.FontWeight = 'bold';
-            app.speedSlider.FontAngle = 'italic';
-            app.speedSlider.Position = [505 70 3 104];
-            app.speedSlider.Value = 10000;
-
-            % Create EditField_3Label
-            app.EditField_3Label = uilabel(app.UIFigure);
-            app.EditField_3Label.HorizontalAlignment = 'right';
-            app.EditField_3Label.FontSize = 18;
-            app.EditField_3Label.Position = [37 260 80 22];
-            app.EditField_3Label.Text = 'Edit Field';
-
-            % Create EditField_Telegraph
-            app.EditField_Telegraph = uieditfield(app.UIFigure, 'text');
-            app.EditField_Telegraph.ValueChangedFcn = createCallbackFcn(app, @EditField_TelegraphValueChanged, true);
-            app.EditField_Telegraph.FontSize = 18;
-            app.EditField_Telegraph.Tooltip = {'Type Telegraph code according to ITA2 protocl for Baudot code (Supports Alphabets and space (00100)) such that each character consists of 5 data bits, preceeded by one start bit (0) and succeeded by two stop bits (11).'};
-            app.EditField_Telegraph.Position = [38 251 451 40];
-            app.EditField_Telegraph.Value = '000101110110001100010111';
-
-            % Create TextLabel
-            app.TextLabel = uilabel(app.UIFigure);
-            app.TextLabel.FontSize = 16;
-            app.TextLabel.FontWeight = 'bold';
-            app.TextLabel.Position = [38 433 79 31];
-            app.TextLabel.Text = 'Text:';
-
-            % Create MorseCodeLabel
-            app.MorseCodeLabel = uilabel(app.UIFigure);
-            app.MorseCodeLabel.FontSize = 16;
-            app.MorseCodeLabel.FontWeight = 'bold';
-            app.MorseCodeLabel.Position = [37 359 102 28];
-            app.MorseCodeLabel.Text = 'Morse Code:';
-
-            % Create TelegraphLabel
-            app.TelegraphLabel = uilabel(app.UIFigure);
-            app.TelegraphLabel.FontSize = 16;
-            app.TelegraphLabel.FontWeight = 'bold';
-            app.TelegraphLabel.Position = [37 290 133 29];
-            app.TelegraphLabel.Text = 'Telegraph:';
-
-            % Create DisplayAudioDropDown
-            app.DisplayAudioDropDown = uidropdown(app.UIFigure);
-            app.DisplayAudioDropDown.Items = {'Display Morse', 'Display Telegraph'};
-            app.DisplayAudioDropDown.ValueChangedFcn = createCallbackFcn(app, @DisplayAudioDropDownValueChanged, true);
-            app.DisplayAudioDropDown.FontWeight = 'bold';
-            app.DisplayAudioDropDown.FontAngle = 'italic';
-            app.DisplayAudioDropDown.Position = [507 328 128 25];
-            app.DisplayAudioDropDown.Value = 'Display Morse';
-
-            % Create DisplayAudioButton
-            app.DisplayAudioButton = uibutton(app.UIFigure, 'push');
-            app.DisplayAudioButton.ButtonPushedFcn = createCallbackFcn(app, @DisplayAudioButtonPushed, true);
-            app.DisplayAudioButton.FontName = 'Arial';
-            app.DisplayAudioButton.FontWeight = 'bold';
-            app.DisplayAudioButton.FontAngle = 'italic';
-            app.DisplayAudioButton.Position = [524 290 95 26];
-            app.DisplayAudioButton.Text = 'Display Audio';
-
-            % Show the figure after all components are created
-            app.UIFigure.Visible = 'on';
-        end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,3);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal (Low-pass Filter)');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+else  
+    subplot(2,1,1);
+    plot(t, modulated, 'Color', colors(3,:), 'LineWidth', 2);
+    if method == 1
+        title('PAM Modulated Signal (No Noise) - Sample and Hold');
+    else
+        title('PAM Modulated Signal (No Noise) - Sinc Based');
     end
-
-    % App creation and deletion
-    methods (Access = public)
-
-        % Construct app
-        function app = Sim_8_4
-
-            % Create UIFigure and components
-            createComponents(app)
-
-            % Register the app with App Designer
-            registerApp(app, app.UIFigure)
-
-            if nargout == 0
-                clear app
-            end
-        end
-
-        % Code that executes before app deletion
-        function delete(app)
-
-            % Delete UIFigure when app is deleted
-            delete(app.UIFigure)
-        end
-    end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(2,1,2);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal (Low-pass Filter)');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
 end
