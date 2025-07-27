@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       Illustrating Linear Distortion on Biosignals: 3-6      %
+%               Illustrating Linear Distortion:                %
 %                     Channel Effects                          %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                   Chapter 3-Section 5                      %
+%                   Chapter 3-Section 3-4                      %
 %                                                              %
 %                                                              %
 %   Version.1:             03/10/27---Dr.Ghassemi              %
@@ -147,12 +147,12 @@ subplot(4,2,1);
 plot(freqs(1:N/2), abs(H0(1:N/2)), 'Color',colors(2,:), 'LineWidth', 2);
 title('Magnitude Response (Case 0)'); xlabel('Normalized Frequency'); ylabel('Magnitude'); grid on;
 
-subplot(4,2,2);
+subplot(4,2,3);
 plot(freqs(1:N/2), unwrap(-angle(Phase0(1:N/2))), 'Color', colors(3,:), 'LineWidth', 2);
 title('Phase Response (Case 0)'); xlabel('Normalized Frequency'); ylabel('Phase (radians)'); grid on;
 
 % Case 1: Magnitude and Phase
-subplot(4,2,3);
+subplot(4,2,2);
 plot(freqs(1:N/2), abs(H1(1:N/2)), 'Color',colors(2,:), 'LineWidth', 2);
 title('Magnitude Response (Case 1)'); xlabel('Normalized Frequency'); ylabel('Magnitude'); grid on;
 
@@ -165,12 +165,12 @@ subplot(4,2,5);
 plot(freqs(1:N/2), abs(H2(1:N/2)), 'Color', colors(2,:), 'LineWidth', 2);
 title('Magnitude Response (Case 2)'); xlabel('Normalized Frequency'); ylabel('Magnitude'); grid on;
 
-subplot(4,2,6);
+subplot(4,2,7);
 plot(freqs(1:N/2), unwrap(-angle(Phase2(1:N/2))), 'Color', colors(3,:), 'LineWidth', 2);
 title('Phase Response (Case 2)'); xlabel('Normalized Frequency'); ylabel('Phase (radians)'); grid on;
 
 % Case 3: Magnitude and Phase
-subplot(4,2,7);
+subplot(4,2,6);
 plot(freqs(1:N/2), abs(H3(1:N/2)), 'Color', colors(2,:), 'LineWidth', 2);
 title('Magnitude Response (Case 3)'); xlabel('Normalized Frequency'); ylabel('Magnitude'); grid on;
 
