@@ -1,120 +1,198 @@
-% Set Text Font
-set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  GUI for Signal Quantization and Delta Modulation Comparison %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                     By: Dr.Farnaz Ghassemi                   %
+%                   Chapter 9 - Chapter                        %
+%                                                              %
+%                                                              %
+%   Version1:             03/03/30                             %
+%   The first version Contributed voluntarily by               %
+%   Arash Haeri Moghadam as an activity for the related course.%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%------------------------- Discription ------------------------
+%%  This MATLAB function simulates the process of quantizing an analog 
+%   signal and computes the Signal-to-Noise Ratio (SNR) for both normal 
+%   quantization and delta modulation. It also allows the user to select 
+%   various types of analog signals, modify signal parameters, and 
+%   visualize the results using a GUI. The user can choose the type of 
+%   analog signal, frequency, duration, number of quantization bits, and 
+%   other parameters, and the function will calculate and display the SNR 
+%   for both quantization methods.
+%   Inputs:
+%   - Numeric Edit Fields to enter parameters: (Analog Signal Frequency (Hz), 
+%   Analog Signal Duration (seconds), Number of Quantization Bits, 
+%   Initial Delta for Delta Modulation).
+%   - Dropdown List To Select An Analog Signal Type: (e.g., Sine, Cosine, Rectangular, etc.).
+%   - Check Box To Add Noise: The user can check this box to add Gaussian noise to the analog signal.
+%   Outputs:
+%   - Quantization: The function plots four figures showing:
+%       - The original analog signal.
+%       - The normal quantized signal.
+%       - The delta modulated signal.
+%       - A comparison of the quantized points from normal quantization and 
+%         delta modulation.
+%   - SNR Calculation: The function calculates the SNR for both the normal 
+%   quantized signal and the delta modulated signal and displays the 
+%   results in a pop-up message.
+%%---------------------------------------------------------------
+%%
+function GUI_Quantization_vs_DM()
 
-% Set default properties for titles, labels, and axes
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
-set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
-set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
+    % GUI
+    fig = uifigure('Name', 'Quantization and SNR', 'Position', [100 100 500 450]);
+    function_label = uilabel(fig, 'Text', 'Analog Signal Type:', 'Position', [50 370 200 22]);
+    function_choice = uidropdown(fig, 'Items', {'Sine', 'Cosine', 'Rectangular', 'Triangular', 'Exponential', 'Square Pulse', 'Sawtooth', 'Linear'}, 'Position', [200 370 150 22]);
+    frequency_label = uilabel(fig, 'Text', 'Analog Signal Frequency (Hz):', 'Position', [50 330 200 22]);
+    frequency_entry = uieditfield(fig, 'numeric', 'Position', [250 330 150 22] , 'Value',10 );
+    duration_label = uilabel(fig, 'Text', 'Analog Signal Duration (seconds):', 'Position', [50 290 200 22]);
+    duration_entry = uieditfield(fig, 'numeric', 'Position', [250 290 150 22], 'Value',5);
+    num_bits_label = uilabel(fig, 'Text', 'Number of Quantization Bits:', 'Position', [50 250 200 22]);
+    num_bits_entry = uieditfield(fig, 'numeric', 'Position', [250 250 150 22], 'Value',8);
+    initial_delta_label = uilabel(fig, 'Text', 'Initial Delta for Delta Modulation:', 'Position', [50 210 200 22]);
+    initial_delta_entry = uieditfield(fig, 'numeric', 'Position', [250 210 150 22], 'Value', 0.5);
+    noise_checkbox = uicheckbox(fig, 'Text', 'Add Noise', 'Position', [50 170 200 22]);
+    calculate_button = uibutton(fig, 'push', 'Text', 'Quantization and SNR', 'Position', [170 120 160 30], 'ButtonPushedFcn', @(btn,event) calculate_snr());
+   
+    % User Input
+    function calculate_snr()
+       
+        func_type = function_choice.Value;
+        frequency = frequency_entry.Value;
+        duration = duration_entry.Value;
+        num_bits = num_bits_entry.Value;
+        initial_delta = initial_delta_entry.Value;
+        add_noise = noise_checkbox.Value;
 
-% Set default properties for title font specifically
-set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
-set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
-
-% Set default properties for all axes
-set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
-%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
-set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
-set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
-
-% Set default properties for axes
-set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
-set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
-set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
-set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
-
-% Box Style for Axe
-set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%ax = gca;
-%ax.XTick = -5:1:5; % Adjust the x-axis grid spacing
-%ax.YTick = -1:0.2:2; % Adjust the y-axis grid spacing
-
-% Define the data points
-x = [1, 3, 5, 7, 9, 11]; % n values (odd numbers)
-x1 = [1, 1/3, 1/5, 1/7, 1/9, 1/11]; % Code rate, r
-
-p_values = [0.01, 0.0001, 0.25, 0.5]; % Different p's to explore
-colors=[
-        0,0,0.75;                    %2-Blue
-        214/255,39/255,40/255;       %3-Red
-        15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;     %5-Purple
-
-        ];
-markers = ['o'];
-
-% Create a finer x-grid for interpolation
-%xq = linspace(min(x1), max(x1), 1000);
-xq = logspace(log10(min(x1)), log10(max(x1)), 1000);
-
-figure;
-hold on; grid on;
-
-% Decide which index gets %.4f (e.g., the first one)
-special_idx = 2;
-
-for idx = 1:length(p_values)
-    p = p_values(idx);
-    
-    % Initialize y
-    y = zeros(size(x));
-    
-    % Compute y[i] = sum of binomial probabilities from (n+1)/2 to n
-    for i = 1:length(x)
-        n = x(i);
-        k_start = (n + 1)/2; % starting value of k (majority)
-        
-        % Initialize the sum for the current n
-        y_sum = 0;
-        
-        % Compute the binomial probabilities for k_start to n
-        for k = k_start:n
-            y_sum = y_sum + nchoosek(n, k) * p^k * (1 - p)^(n - k);
+        % Validatation
+        if frequency <= 0
+            uialert(fig, 'Frequency must be greater than 0', 'Input Error', 'Icon', 'error');
+            return;
         end
-        
-        % Assign the result to y(i)
-        y(i) = y_sum;
+        if duration <= 0
+            uialert(fig, 'Duration must be greater than 0', 'Input Error', 'Icon', 'error');
+            return;
+        end
+        if num_bits <= 0
+            uialert(fig, 'Number of quantization bits must be greater than 0', 'Input Error', 'Icon', 'error');
+            return;
+        end
+        if initial_delta <= 0
+            uialert(fig, 'Initial delta must be greater than 0', 'Input Error', 'Icon', 'error');
+            return;
+        end
+
+        Fs = 10 * frequency; % sampling rate
+        t = 0:1/Fs:duration-1/Fs;
+
+        % Analog signal
+        switch func_type
+            case 'Sine'
+                x_analog = sin(2*pi*frequency*t);
+            case 'Cosine'
+                x_analog = cos(2*pi*frequency*t);
+            case 'Rectangular'
+                x_analog = double(mod(floor(frequency*t), 2) == 0);
+            case 'Triangular'
+                x_analog = sawtooth(2*pi*frequency*t, 0.5);
+            case 'Exponential'
+                x_analog = exp(-frequency*t);
+            case 'Square Pulse'
+                x_analog = square(2*pi*frequency*t);
+            case 'Sawtooth'
+                x_analog = sawtooth(2*pi*frequency*t);
+            case 'Linear'
+                x_analog = t;
+        end
+
+        if add_noise
+            noise = 0.1 * randn(size(t)); % white Gaussian noise
+            x_analog = x_analog + noise;
+        end
+
+        % Normal Quantization
+        L = 2^num_bits; % Quantization levels
+        x_min = min(x_analog);
+        x_max = max(x_analog);
+        delta = (x_max - x_min) / (L-1); % Quantization step size
+        x_digital = round((x_analog - x_min) / delta) * delta + x_min;
+        noise_normal = x_analog - x_digital;
+        SNR_quantized_normal = snr(x_digital, noise_normal);
+
+        % Delta Modulation
+        x_delta = zeros(1, length(t));
+        x_delta(1) = x_analog(1);
+        delta = initial_delta;
+       
+        for i = 2:length(t)
+            if x_analog(i) > x_delta(i-1)
+                x_delta(i) = x_delta(i-1) + delta;
+            else
+                x_delta(i) = x_delta(i-1) - delta;
+            end
+
+            % Adaptive delta
+            delta = delta * 1.2 * (abs(x_analog(i) - x_delta(i-1)) / delta);
+        end
+
+        noise_delta = x_analog - x_delta;
+        SNR_quantized_delta = snr(x_delta, noise_delta);
+
+        % Plotting
+        figure;
+        subplot(4, 1, 1);
+        plot(t, x_analog);
+        title(['Original Analog Signal (' func_type ')']);
+        xlabel('Time (seconds)');
+        ylabel('Signal Value');
+        xlim([0 1]); %x-axis limit to 1 second
+        grid on;
+
+        subplot(4, 1, 2);
+        plot(t, x_analog, 'b', 'LineWidth', 1);
+        hold on;
+        stem(t, x_digital, 'r', 'LineWidth', 1, 'MarkerSize', 4); % Plot quantized signal
+        title(['Normal Quantized Signal (' num2str(num_bits) ' bits)']);
+        xlabel('Time (seconds)');
+        ylabel('Quantized Signal Value');
+        legend('Analog Signal', 'Quantized Signal');
+        xlim([0 1]); %x-axis limit to 1 second
+        hold off;
+        grid on;
+
+        subplot(4, 1, 3);
+        plot(t, x_analog, 'b', 'LineWidth', 1);
+        hold on;
+        stem(t, x_delta, 'r', 'LineWidth', 1, 'MarkerSize', 4); % Plot delta modulated signal
+        title('Delta Modulated Signal');
+        xlabel('Time (seconds)');
+        ylabel('Delta Signal Value');
+        legend('Analog Signal', 'Delta Modulated Signal');
+        xlim([0 1]); %x-axis limit to 1 second
+        hold off;
+        grid on;
+
+        subplot(4, 1, 4);
+        stem(t, x_digital, 'r', 'LineWidth', 1.5, 'MarkerSize', 4);
+        hold on;
+        stem(t, x_delta, 'g', 'LineWidth', 1.5, 'MarkerSize', 4);
+        title('Quantized Points Comparison');
+        xlabel('Time (seconds)');
+        ylabel('Quantized Signal Value');
+        legend('Normal Quantization', 'Delta Modulation');
+        xlim([0 1]); %x-axis limit to 1 second
+        hold off;
+        grid on;
+
+        %zoom and pan
+        h = zoom;
+        set(h,'Motion','horizontal','Enable','on');
+
+        h = pan;
+        set(h,'Motion','horizontal','Enable','on');
+
+        % Display SNR
+        msg = sprintf('SNR for Normal Quantized Signal: %.2f dB\nSNR for Delta Modulated Signal: %.2f dB', SNR_quantized_normal, SNR_quantized_delta);
+        uialert(fig, msg, 'Result', 'Icon', 'info');
     end
-    
-    % Interpolate using makima
-    %y_interp = interp1(x1, y, xq, 'makima');
-    % Interpolate in log-log space
-    y_log = log10(y);
-    y_interp_log = interp1(log10(x1), y_log, log10(xq), 'makima');
-    y_interp = 10.^y_interp_log;
-
-    %y_interp = max(y_interp, 1e-8); % Clip to minimum value
-
-    % Choose format based on index
-    if idx == special_idx
-        label_str = sprintf('p = %.4f', p);
-    else
-        label_str = sprintf('p = %.2f', p);
-    end
-    
-    % Plot the interpolated curve
-    %plot(xq, y_interp, 'LineWidth', 2.25, 'Color', colors(idx, :), 'DisplayName', label_str);
-    loglog(xq, y_interp, 'LineWidth', 2.25,'Color', colors(idx, :), 'DisplayName', label_str);
-
-    % Plot the original data points
-    %plot(x1, y, 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off');
-    loglog(x1, y, 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off'); 
-    hold on;
 end
-
-% Set axis properties
-set(gca, 'XScale', 'log');
-set(gca, 'YScale', 'log');
-%xlim([0.01, 10]);
-%ylim([1e-8, 1e-1]);
-
-% Labels and title
-xlabel('Code rate, r');
-ylabel('Average probability of error, P_\epsilon');
-
-% Legend and grid
-legend('Location', 'southeast');
-grid on;
