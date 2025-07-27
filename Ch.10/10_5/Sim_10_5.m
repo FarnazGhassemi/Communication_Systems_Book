@@ -1,353 +1,236 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Illustrating Chapter 10 Digital Modulation :         %
-%                                 PSK Modulation               %
+%                   Illustrating Simulation 8-5:               %
+%           Entropy of Biosignals comparing to noise           %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 10                          %
+%                     Chapter 8-Section                        %
 %                                                              %
 %                                                              %
-%   Version.1:             03/10/27---Dr.Ghassemi              %
+%   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%---------------------------------------------------------------
 close all;
-clear all;
+clear;
 clc;
-colors=[0,0,0;                       %1-Black
-        0,0,0.75;                    %2-Blue
-        214/255,39/255,40/255;       %3-Red
-        15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;     %5-Purple
-        225/255,124/255,5/255;       %6-Orange
-        56/255,166/255,165/255;      %7-Light Blue
-        204/255,80/255,62/255;       %8-Light Red
-        115/255,175/255,72/255;      %9-Light Green
-        237/255,173/255,8/255;       %10-Light Orange
-        148/255,52/255,110/255;      %11-Light Purple
-        70/255,0,114/255;            %12-Dark Blue
-        0,0.5,0.25                   %13-Green
-        ];
-grayColor = [0.5, 0.5, 0.5];
-marks={'-';'--';':';'-.'};
+clc
+clear all
+close all
+m=input('Mannual=0/Auto=1  ???');
+%---------Input data-------------------------
+if (m==0)
+    I=input('Number of Symbols?');
+    %p=zeros(1:I);
+    symbols=[1:I];
+    for i=1:(I-1)
+        p(i)=input(['p(',num2str(i),')=?']);
+    end
+    p(I)=1-sum(p);
+    if or((p(I)<0),(p(I)>1))
+        disp('Error in probability!!!')
+        return;
+    end
+else
+    disp('Number of Auto-Coding? (1 to 4)')
+    disp('1: Full English Alphabet')
+    disp('2: Full Nunbers')
+    disp('3: A T SH K L M v')
+    disp('4: b i o e n g r')
+    k=input('?');
+    switch k
+        case 1
+            symbols = {'a' , 'b' , 'c' , 'd' , 'e' , 'f' , 'g' , 'h' , 'i' , 'j' , 'k' , 'l' , 'm' , 'n' , 'o' , 'p' , 'q' , 'r' , 's' , 't' , 'u' , 'v' , 'w' , 'x' , 'y' , 'z'};
+            p = [36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 , 22 , 21 , 20 , 19 , 17 , 16 , 14 , 13 , 12 , 11 , 8 , 4 , 2 , 1 ]/537; % Probability distribution
+        case 2
+            symbols = {' ','0','1','2','3','4','5','6','7','8','9','.'};
+            p = [36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 ]/sum([36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 ]); % Probability distribution
+        case 3
+            symbols ={'A','T','SH','K','L','M','v'};
+            %p = [64,4,8,1,2,16,32]/127;
+            p = [64,4,8,1,2,16,32]/127;
+        case 4
+            symbols = {'b' 'i' 'o' 'e' 'n' 'g' 'r'}; % Distinct symbols that data source can produce
 
-% Set Text Font
-set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
-
-% Set default properties for titles, labels, and axes
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
-set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
-set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
-
-% Set default properties for title font specifically
-set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
-set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
-
-% Set default properties for all axes
-set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
-%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
-set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
-set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
-
-% Set default properties for axes
-set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
-set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
-set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
-set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
-
-% Box Style for Axe
-set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              DSB Modulation                                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-t0=10;                               	% signal duration
-ts=0.001;                            	% sampling interval
-fs=1/ts;                             	% sampling frequency
-t=[0:ts:t0-ts];                         	% time vector
-df=0.2;                              	% required frequency resolution
-
-
-
-% message signal
-
-p=[1 1 -1 1 -1 1 1 -1 -1 -1];                % Message signal
-m=[];
-for i=1: length(p)
-    m=[m,p(i)*ones(1,fs)];
+            p = [100,6,12,1,3,25,50]/197;
+            %     symbols = =[1:6];
+    end  
+    
+    I=length(symbols);
+    disp(['Number of Alphabets: ',num2str(I)])
+    disp(['Sum of Probabilities: ',num2str(sum(p))])
+    disp(['Probabilities: ',num2str(p)])
 end
-m_n=m;%(m-mean(m))/max(abs(m));            % normalized message signal
-M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
-f = linspace(-fs/2, fs/2, length(M));	% frequency vector
-
-
-
-% carrier signal
-fc=2;                              	% carrier frequency
-c=cos(2*pi*fc.*t);                   	% carrier signal
-C = fftshift(fft(c) / length(c));       % Fourier transform 
-
-
-
-% DSB Modulated signal
-u=(m_n).*c;                       % DSB Modulated signal
-U = fftshift(fft(u) / length(u));      % Fourier transform 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Plot Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+5)*1.2;
-
-% Figure 1: Message Signal
-figure
-subplot(2,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The message signal')
-grid on
-subplot(2,1,2)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 2: Carrier Signal
-figure
-subplot(2,1,1)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The carrier signal') 
-grid on
-subplot(2,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 3: DSB Modulated Signal
-figure
-subplot(2,1,1)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The PSK Modulated signal')
-grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-
-% Figure 4: Time Signals
-figure
-subplot(3,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The PSK Modulated Signal')
-grid on
-hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
-
-% Figure 5: Frequency Signals
-figure
-subplot(3,1,1)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
-
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The PSK Modulated Signal')
-grid on
-hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                           Bipolar PSK                                   %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% message signal
-
-p=[1 1 -1 1 -1 1 1 -1 -1 -1];                % Message signal
-m=[];
-for i=1: length(p)
-    m=[m,p(i)*ones(1,fs)];
+%---------------------------------------------
+%---------Coding data-------------------------
+[dict,avglen] = huffmandict(symbols,p); % Create dictionary.
+disp('The Dictionary is:')
+disp(['      Symbol   Code    Probability'])
+for i=1:I
+     disp([dict(i,1),num2str(cell2mat(dict(i,2))),num2str(p(i))])
 end
-m_n=m;%(m-mean(m))/max(abs(m));            % normalized message signal
-M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
-f = linspace(-fs/2, fs/2, length(M));	% frequency vector
+disp('The Average Length is:')
+disp(avglen)
+disp('###################################################################')
+%disp('-------------------------------------------------------------------')
+%---------------------------------------------
+%---------Output data-------------------------
+i=1;
+if (m==0)
+    actualsig =input('symbols in numbers for coding? (ex. [1 2 1 3]/exit: -100 )');
+    if (actualsig==-100)
+        return;
+    end
+    while (actualsig~=-100)
+        comp = huffmanenco(actualsig,dict)
+        actualsig =input('symbols in numbers for coding? (ex. [1 2 1 3]/exit: -100 )');
+        if (actualsig==-100)
+           return;
+        end
+    end   
+else   
+    switch k
+        case 1
+            actualsig={'h' 'a' 'p' 'p' 'y'};
+            comp = huffmanenco(actualsig,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+%     actualsig={'a' 'p' 'p' 'l' 'e'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+%     actualsig={'h' 'u' 'r' 'a' 'y'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+%     actualsig={'s' 'm' 'a' 'r' 't'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+        case 2
+            symbols = {'1','3','5','9'};
+            comp = huffmanenco(symbols,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+             % load('MATLAB.mat')
+             % actualsig =1;
+             % while (i<= length(A))
+             %    actualsig =num2str(A(i,1));
+             %    comp = num2str(huffmanenco(actualsig,dict));
+             %    T(i,1)={comp};
+             %    actualsig =num2str(A(i,2));
+             %    comp= num2str(huffmanenco(actualsig,dict));
+             %    T(i,2)={comp};
+             %    i=i+1;
+             % end
+             % disp(['Encoded Data:'])
+             % disp(T)
+        case 3
+            actualsig={'T' 'A' 'L' 'A' 'SH'};
+            comp = huffmanenco(actualsig,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+        case 4
+            actualsig={'b' 'i' 'o' 'e' 'n' 'g' 'i' 'n' 'e' 'e' 'r' 'i' 'n' 'g'};
+            comp = huffmanenco(actualsig,dict);
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+            %     actualsig = randsrc(100,1,[symbols; p]); % Create data using p.
+%     actualsig=[11110001110100100100001101011000001001];
 
-
-
-% carrier signal
-fc=15;                              	% carrier frequency
-c=cos(2*pi*fc.*t);                   	% carrier signal
-C = fftshift(fft(c) / length(c));       % Fourier transform 
-
-
-
-% DSB Modulated signal
-u=(m_n).*c;                       % DSB Modulated signal
-U = fftshift(fft(u) / length(u));      % Fourier transform 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Plot Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+5)*1.2;
-
-% Figure 6: Message Signal
-figure
-subplot(2,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The message signal')
-grid on
-subplot(2,1,2)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 7: Carrier Signal
-figure
-subplot(2,1,1)
-plot(t,c(1:length(t)),'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The carrier signal') 
-grid on
-subplot(2,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 8: DSB Modulated Signal
-figure
-subplot(2,1,1)
-plot(t,u(1:length(t)),'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The PSK Modulated signal')
-grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-
-% Figure 9: Time Signals
-figure
-subplot(3,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The PSK Modulated Signal')
-grid on
-hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
-
-% Figure 10: Frequency Signals
-figure
-subplot(3,1,1)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
-
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The PSK Modulated Signal')
-grid on
-hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  %close(gcf)
+    end     
+ 
+%      actualsig =num2str(input('symbol? '))
+%      comp = huffmanenco(actualsig,dict) 
 end
 
+%---------Decode user data-------------------------
+% actualsig=[];
+switch k
+    case 1
+        actualsig =input('Symbols for Coding?(ex.: [''t'' ''e'' ''l'']/exit: -100)');
+        if (actualsig==-100)
+           return;
+        end
+         while (actualsig ~= -100)
+             comp = huffmanenco(actualsig,dict);
+             dsig = huffmandeco(comp,dict); % Decode the Huffman code
+             %     str2num((char(dsig))')
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',actualsig ])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp([char (dsig)])
+            actualsig =num2str(input('Symbols for Coding?(ex.: [''t'' ''e'' ''l'']/exit: -100)'));
+            if (str2num(actualsig)==-100)
+               return;
+            end
+         end
+    case 2
+        actualsig =input('Symbols for Coding?(ex.: 9311018/exit: -100)');
+        if (actualsig==-100)
+           return;
+        end
+        while (actualsig ~= -100)
+            comp = huffmanenco(num2str(actualsig),dict) ;
+            %  x=[];
+            % for i=1:length(A) 
+            %     if(strmatch(str2num(char(T(i,1)))',comp))
+            %         x=i;
+            %     end
+            % end
+            % dsig = huffmandeco(str2num(char(T(x,2)))',dict); % Decode the Huffman code.
+        %     str2num((char(dsig))')
+            % disp([num2str(actualsig) ,'     ',(char(dsig))'])
+            dsig = huffmandeco(comp,dict); % Decode the Huffman code.
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',num2str(actualsig)])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp(['     ',cell2mat(dsig)])
+            actualsig=[];
+            actualsig =input('Symbols for Coding?(ex.: 9311018 /exit: -100)');
+            if (actualsig == -100)
+               return;
+            end
+        end
+    case 3
+        actualsig =input('Symbols for Coding?(ex.: [ ''A''  ''T'' ''S'' ''K'' ''L'' ''M'' ''v'']/exit: -100)');
+        if (actualsig==-100)
+           return;
+        end
+        while (actualsig ~= -100)
+            comp = huffmanenco(actualsig,dict) % Encode the data.
+            dsig = huffmandeco(comp,dict) % Decode the Huffman code.
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',num2str(actualsig)])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp(['     ',cell2mat(dsig)])
+            actualsig=[];
+            actualsig =input('Symbols for Coding?(ex.: [ ''A''  ''T'' ''S'' ''K'' ''L'' ''M'' ''v'']/exit: -100)');
+            if (actualsig == -100)
+               return;
+            end
+        end
+        case 4
+            actualsig =input('Symbols for Coding?(ex.: [ ''b'' ''i'' ''o'' ''e'' ''n'' ''g'' ''r'']/exit: -100)');
+            if (actualsig==-100)
+               return;
+            end
+            while (actualsig ~= -100)
+                comp = huffmanenco(actualsig,dict); % Encode the data.
+                dsig = huffmandeco(comp,dict); % Decode the Huffman code.
+                disp(dict)
+                disp(['Message:'])
+                disp(['     ',num2str(actualsig)])
+                disp(['Encoded Data:'])
+                disp(['     ',num2str(comp)])
+                disp(['Dencoded Data:'])
+                disp(['     ',cell2mat(dsig)])
+                actualsig=[];
+                actualsig =input('Symbols for Coding?(ex.: [ ''b'' ''i'' ''o'' ''e'' ''n'' ''g'' ''r'']/exit: -100)');
+                if (actualsig == -100)
+                   return;
+                end
+            end
+end

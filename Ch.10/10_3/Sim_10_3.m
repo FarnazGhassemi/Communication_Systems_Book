@@ -1,353 +1,94 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Illustrating Chapter 10 Digital Modulation :         %
-%                                 ASK Modulation               %
+%              LZW Compression and Decompression               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 10                          %
+%                          Chapter 8                           %
 %                                                              %
 %                                                              %
-%   Version.1:             03/10/27---Dr.Ghassemi              %
+%   Version.1:             03/03/30                            %
+%   The first version Contributed voluntarily by               %
+%   Kian Mobasheri and Nima Delbari as an activity for the     %
+%   related course.                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-close all;
-clear all;
-clc;
-colors=[0,0,0;                       %1-Black
-        0,0,0.75;                    %2-Blue
-        214/255,39/255,40/255;       %3-Red
-        15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;     %5-Purple
-        225/255,124/255,5/255;       %6-Orange
-        56/255,166/255,165/255;      %7-Light Blue
-        204/255,80/255,62/255;       %8-Light Red
-        115/255,175/255,72/255;      %9-Light Green
-        237/255,173/255,8/255;       %10-Light Orange
-        148/255,52/255,110/255;      %11-Light Purple
-        70/255,0,114/255;            %12-Dark Blue
-        0,0.5,0.25                   %13-Green
-        ];
-grayColor = [0.5, 0.5, 0.5];
-marks={'-';'--';':';'-.'};
+%%------------------------- Discription ------------------------
+%%  This script implements the Lempel-Ziv-Welch (LZW) compression algorithm 
+%    to compress and decompress a text file provided by the user. 
+%   It verifies the accuracy of the process by comparing the original 
+%    content with the decompressed output.
+%
+%   Functions :
+%       norm2lzw : compresses the file content using the LZW algorithm. 
+%        returns also the table that the algorithm produces.
+%       lzw2norm : Decompresses the compressed data using the LZW
+%        algorithm. returns also the table that the algorithm produces.
+%   Inputs:
+%       File Input: Prompts the user to input the full path of a text file.
+%   Outputs:
+%       Displays the entropy of the original data.
+%       isOK : Checks if the decompressed text matches the original content.
+%       Displays the original content and the decompressed data in the command window.
+%       Also displays the table that the algorithm produces.
+%%---------------------------------------------------------------
+%%
 
-% Set Text Font
-set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
+clc, clear, close
+% Ask user for input text file path
+filePath = input('Enter the full path of the text file (including its directory): ', 's');
 
-% Set default properties for titles, labels, and axes
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
-set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
-set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
+% Debugging print to verify input
+disp(['File path entered: ', filePath]);
 
-% Set default properties for title font specifically
-set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
-set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
-
-% Set default properties for all axes
-set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
-%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
-set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
-set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
-
-% Set default properties for axes
-set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
-set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
-set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
-set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
-
-% Box Style for Axe
-set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                              ASK Modulation                                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-t0=10;                               	% signal duration
-ts=0.001;                            	% sampling interval
-fs=1/ts;                             	% sampling frequency
-t=[0:ts:t0-ts];                         	% time vector
-df=0.2;                              	% required frequency resolution
-
-
-
-% message signal
-
-p=[1 1 0 1 0 1 1 0 0 0];                % Message signal
-m=[];
-for i=1: length(p)
-    m=[m,p(i)*ones(1,fs)];
-end
-m_n=m;%(m-mean(m))/max(abs(m));            % normalized message signal
-M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
-f = linspace(-fs/2, fs/2, length(M));	% frequency vector
-
-
-
-% carrier signal
-fc=15;                              	% carrier frequency
-c=cos(2*pi*fc.*t);                   	% carrier signal
-C = fftshift(fft(c) / length(c));       % Fourier transform 
-
-
-
-% ASK Modulated signal
-u=(m_n).*c;                       % ASK Modulated signal
-U = fftshift(fft(u) / length(u));      % Fourier transform 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Plot Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+5)*1.2;
-
-% Figure 1: Message Signal
-figure
-subplot(2,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The message signal')
-grid on
-subplot(2,1,2)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 2: Carrier Signal
-figure
-subplot(2,1,1)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The carrier signal') 
-grid on
-subplot(2,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 3: ASK Modulated Signal
-figure
-subplot(2,1,1)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The ASK Modulated signal')
-grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-
-% Figure 4: Time Signals
-figure
-subplot(3,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The ASK Modulated Signal')
-grid on
-hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
-
-% Figure 5: Frequency Signals
-figure
-subplot(3,1,1)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
-
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The ASK Modulated Signal')
-grid on
-hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                           Bipolar ASK                                   %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% message signal
-
-p=[1 1 -1 1 -1 1 1 -1 -1 -1];                % Message signal
-m=[];
-for i=1: length(p)
-    m=[m,p(i)*ones(1,fs)];
-end
-m_n=m;%(m-mean(m))/max(abs(m));            % normalized message signal
-M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
-f = linspace(-fs/2, fs/2, length(M));	% frequency vector
-
-
-
-% carrier signal
-fc=15;                              	% carrier frequency
-c=cos(2*pi*fc.*t);                   	% carrier signal
-C = fftshift(fft(c) / length(c));       % Fourier transform 
-
-
-
-% ASK Modulated signal
-u=0.5*(1+m_n).*c;                       % ASK Modulated signal
-U = fftshift(fft(u) / length(u));      % Fourier transform 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Plot Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fp=(fc+5)*1.2;
-
-% Figure 6: Message Signal
-figure
-subplot(2,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The message signal')
-grid on
-subplot(2,1,2)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 7: Carrier Signal
-figure
-subplot(2,1,1)
-plot(t,c(1:length(t)),'Color', colors(4,:),'LineWidth', 2)
-%axis([0 t0 -1.2 1.2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The carrier signal') 
-grid on
-subplot(2,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-% Figure 8: ASK Modulated Signal
-figure
-subplot(2,1,1)
-plot(t,u(1:length(t)),'Color', colors(3,:),'LineWidth', 2)
-%axis([0 t0 -2 2])
-xlabel('Time')
-ylabel('Amplitude')
-title('The ASK Modulated signal')
-grid on
-hold on
-%plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-%plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-subplot(2,1,2)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlabel('Frequency')
-ylabel('Magnitude')
-%title('Spectrum of the message signal')
-xlim([-fp fp])
-grid on
-
-% Figure 9: Time Signals
-figure
-subplot(3,1,1)
-plot(t,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(t,c,'Color', colors(4,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(t,u,'Color', colors(3,:),'LineWidth', 2)
-xlabel('Time')
-ylabel('Amplitude')
-title('The ASK Modulated Signal')
-grid on
-hold on
-% plot(t,envelope(u(1:length(t))),'Color', colors(7,:),'LineStyle',marks{2},'LineWidth', 2)
-% plot(t,envelope(u(1:length(t)))-mean(envelope(u(1:length(t)))),'Color', colors(12,:),'LineStyle',marks{2},'LineWidth', 2)
-% legend('Am Modulated Signal','Message Signal with DC Offset','Message Signal')
-
-% Figure 10: Frequency Signals
-figure
-subplot(3,1,1)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Message Signal') 
-grid on
-subplot(3,1,2)
-plot(f,abs(C),'Color', colors(4,:),'LineWidth', 2) 
-xlim([-fp fp])
-
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The Carrier Signal') 
-grid on
-subplot(3,1,3)
-plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
-xlim([-fp fp])
-xlabel('Frequency')
-ylabel('Magnitude')
-title('The ASK Modulated Signal')
-grid on
-hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  %close(gcf)
+% Check if the file exists
+if exist(filePath, 'file') ~= 2
+    error(['File does not exist at path: ', filePath]);
 end
 
+% Read from the user-specified file
+fileID = fopen(filePath, 'r');
+format = '%c';
+% Get string of text from file
+data = fscanf(fileID, format);
+
+% --- Entropy calculation ---
+symbols = unique(data);
+counts = histc(data, symbols);
+probabilities = counts / sum(counts);
+entropy = -sum(probabilities .* log2(probabilities));
+fprintf('\nEntropy of the original data: %.4f bits/symbol\n', entropy);
+
+
+LZW_content = data;
+fclose(fileID);
+%disp(LZW_content);
+% pack it
+[packed,table]=norm2lzw(uint8(LZW_content));
+% unpack it
+[decoded,table]=lzw2norm(packed);
+% transfor it back to char array
+decoded = char(decoded);
+% test
+isOK = strcmp(LZW_content,decoded)
+
+% -------------------------------
+% Compression efficiency section
+% -------------------------------
+
+original_size = length(LZW_content);      % characters (each = 8 bits)
+compressed_size = length(packed);         % elements (each = 16 bits)
+
+original_bits = original_size * 8;
+compressed_bits = compressed_size * 16;
+
+compression_ratio = compressed_bits / original_bits;
+compression_percent = (1 - compression_ratio) * 100;
+
+fprintf('\n--- Compression Stats ---\n');
+fprintf('Original size     : %d bits (%d bytes)\n', original_bits, original_bits/8);
+fprintf('Compressed size   : %d bits (%d bytes)\n', compressed_bits, compressed_bits/8);
+fprintf('Compression ratio : %.2f%% reduction\n', compression_percent);
+
+% show new table elements
+strvcat(table{257:end})
+LZW_content
+decoded
