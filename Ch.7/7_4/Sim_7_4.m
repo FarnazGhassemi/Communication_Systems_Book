@@ -39,7 +39,7 @@ function GUI_Comparative_Quantization()
     fig = uifigure('Name', 'Quantization and SNR', 'Position', [100 100 400 400]);
 
     function_label = uilabel(fig, 'Text', 'Quantization Type:', 'Position', [50 320 150 22]);
-    function_choice_1 = uidropdown(fig, 'Items', {'Uniform Quantization', 'Non-Uniform Quantizaton'}, 'Position', [200 320 150 22]);
+    function_choice_1 = uidropdown(fig, 'Items', {'Uniform Quantization', 'Non-Uniform Quantization'}, 'Position', [200 320 150 22]);
 
     function_label = uilabel(fig, 'Text', 'Analog Signal Type:', 'Position', [50 280 150 22]);
     function_choice_2 = uidropdown(fig, 'Items', {'Sine', 'Cosine', 'Rectangular', 'Triangular', 'Exponential', 'Square Pulse', 'Sawtooth',  'Linear'}, 'Position', [200 280 150 22]);
