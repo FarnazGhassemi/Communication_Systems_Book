@@ -1,4 +1,15 @@
-function PAM_Sinc_GUI
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 8_2:               %
+%                        PulseModulations                      %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 8-Section                        %
+%                                                              %
+%                                                              %
+%   Version.1:             04/03/03---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function Sim_8_2
 close all
 clear all
 clc

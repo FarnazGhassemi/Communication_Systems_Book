@@ -1,15 +1,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 9_1:               %
-%           Entropy of Biosignals comparing to noise           %
+%                   Illustrating Simulation 8_1:               %
+%                        PulseModulations                      %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 9-Section                        %
+%                     Chapter 8-Section                        %
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function modulation_GUI
+function Sim_8_1
     close all
     clc
     % GUI

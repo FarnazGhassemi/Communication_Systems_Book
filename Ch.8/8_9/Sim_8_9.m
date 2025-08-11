@@ -37,7 +37,7 @@
 %   results in a pop-up message.
 %%---------------------------------------------------------------
 %%
-function GUI_Quantization_vs_DM()
+function Sim_8_9()
 
     % GUI
     fig = uifigure('Name', 'Quantization and SNR', 'Position', [100 100 500 450]);
