@@ -14,7 +14,7 @@ function char4 = encode(char2)
   for i = 1:length(char2)
       k = 0;
       S = {morse_tree};
-      D = {' '};
+      D = {''''};
       % If we reach to the end of the tree we stop.
      while ~isempty(S)
       % Get top of the S and D and delete them from their stacks
@@ -46,7 +46,7 @@ function char4 = encode(char2)
      end
      % If letter is not in the tree, put "*" instead
        if k == 0
-        char4 = [char4 ' *'];
+        char4 = [char4 '*'];
         continue;
       end
   end

@@ -16,7 +16,7 @@ function Output  = decode(Mc)
           M = M{2};
       elseif Mc(k) == '-'
           M = M{3};
-      elseif Mc(k) == ' ' && (Mc(k-1) ~= '/' && Mc(k-1) ~= '*')
+      elseif Mc(k) == '''' && (Mc(k-1) ~= '/' && Mc(k-1) ~= '*')
           N =[N M{1}];
           M = morse_tree;
           continue;

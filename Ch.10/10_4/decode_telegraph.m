@@ -1,8 +1,8 @@
 function char_out = decode_telegraph(bin_input)
-% DECODE_TELEGRAPH decodes a continuous Telegraph string where each character
-%  is encoded as: start bit (0) + 5-bit Baudot code + two stop bits (11). 
-%  It checks the 5 bit data code and returns its decoded character, a space for a word 
-%    gap (00100), or a asterisk if the binary code is unsupported.
+% DECODE_TELEGRAPH decodes an apostrophe-separated Telegraph string where each character
+% is encoded as: start bit (0) + 5-bit Baudot code + two stop bits (11).
+% It checks the 5-bit data code and returns its decoded character,
+% a space for a word gap (00100), or an asterisk if the binary code is unsupported.
 
     % Baudot code table (inverse map)
     codeTable = containers.Map( ...
@@ -14,22 +14,32 @@ function char_out = decode_telegraph(bin_input)
          'U','V','W','X','Y','Z',' '} ...
     );
 
+    % Split the input by apostrophe
+    segments = split(bin_input, "'");
+    
     char_out = '';
-    idx = 1;
 
-    while idx + 7 <= length(bin_input)
-        segment = bin_input(idx:idx+7);  % 8-bit segment
+    for i = 1:length(segments)
+        segment = segments{i}; % get the i-th 8-bit segment
+
+        if length(segment) ~= 8
+            char_out = [char_out '*']; % corrupted segment
+            continue;
+        end
 
         start_bit = segment(1);
         data_bits = segment(2:6);
         stop_bits = segment(7:8);
 
+        if start_bit ~= '0' || stop_bits ~= "11"
+            char_out = [char_out '*']; % invalid start or stop bits
+            continue;
+        end
+
         if isKey(codeTable, data_bits)
             char_out = [char_out codeTable(data_bits)];
         else
-            char_out = [char_out '*'];  % unknown 5-bit code
+            char_out = [char_out '*']; % unknown 5-bit code
         end
-
-        idx = idx + 8;
     end
 end
