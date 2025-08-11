@@ -1,4 +1,14 @@
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 9-1:              %
+%                     Shift Keying Modulations                 %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 10-Section                       %
+%                                                              %
+%                                                              %
+%   Version.1:             04/03/03---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 colors=[0,0,0;                       %1-Black
         0,0,0.75;                    %2-Blue
         214/255,39/255,40/255;       %3-Red
@@ -32,8 +42,8 @@ set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
 set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
 set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
 %set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
-set(groot, 'DefaultAxesXColor', 'white'); % Set X-axis color
-set(groot, 'DefaultAxesYColor', 'white'); % Set Y-axis color
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
 
 % Set default properties for axes
 set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
@@ -103,7 +113,7 @@ for i = 1:size(signals, 1)
     xlabel('t'); ylabel('Amplitude'); grid on;
 
     subplot(5,3,row+3);
-    plot(t_full, conv_result, 'b', 'LineWidth', 1.2);
+    plot(t_full, conv_result, 'b', 'LineWidth', 2.25);
     xlim([0 2*T]); title(['Convolution']);
-    xlabel('t'); ylabel('Amplitude'); grid off;
+    xlabel('t'); ylabel('Amplitude'); grid on;
 end

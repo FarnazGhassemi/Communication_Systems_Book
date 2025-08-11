@@ -4,7 +4,7 @@
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                   Chapter 10 - Section                       %
+%                   Chapter 9 - Section                       %
 %                                                              %
 %                                                              %
 %   Version1:             03/03/30                             %
@@ -393,7 +393,7 @@ classdef Sim_9_2 < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = Sim_10_1
+        function app = Sim_9_2
 
             % Create UIFigure and components
             createComponents(app)

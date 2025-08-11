@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 10-2:              %
-%           Entropy of Biosignals comparing to noise           %
+%                   Illustrating Simulation 9-4:              %
+%                     Shift Keying Modulations                 %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
@@ -9,7 +9,7 @@
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = Sim_10_2(varargin)
+function varargout = Sim_9_4(varargin)
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
