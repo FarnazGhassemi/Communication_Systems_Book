@@ -1,68 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%              GUI for Morse Code Encoder/Decoder              %
-%             with Audio Playback and Visualization            %
-%                                                              %
-%        Book : Analog & Digital Communication Systems         %
-%                   By: Dr.Farnaz Ghassemi                     %
-%                  Chapter 8 -                                 %
-%                                                              %
-%                                                              %
-%   Version.1:             03/03/30                            %
-%   The first version Contributed voluntarily by               %
-%   Sara Khamseh.                                              %
-%   Version.2:             04/01/27                            %
-%   The second version Contributed voluntarily by              %
-%   Fatemeh Yazdani.                                           %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%------------------------- Discription ------------------------
-%%  This code generates a graphical user interface (GUI) designed to 
-%    encode and decode text into either Morse code or 5-bit Telegraph 
-%    code (Baudot-style). The app allows users to input text, Morse code, 
-%    or Telegraph code, convert between these formats, visualize the 
-%    code waveform, and play the corresponding code audio. 
-%    Users can also adjust the playback speed and select from different 
-%    waveform types (sine, sawtooth, or square) for sound generation.
-%
-%   Supported Formats:
-%       - Morse Code: Uses '.' and '-' (or '_') for dots and dashes.
-%          Letters are separated by spaces, words by '/'.
-%       - Telegraph Code: Encodes letters into 5-bit binary strings 
-%          where each character is encoded as: 
-%               start bit (0) + 5-bit Baudot code + two stop bits (11). 
-%          Aplphabets and space (00100) are supported. It returns 5 asterisks 
-%          if the binary code is unsupported.
-%
-%   Functions:
-%       encode: uses a binary tree and depth-first search to map each character 
-%           to Morse code.
-%       decode: traverses a binary Morse code tree from the root for each Morse sequence, 
-%           where a dot (.) moves left and a dash (-) moves right, to reconstruct 
-%           the original English character.
-%       telegraph_code: uses a fixed mapping of letters to 5-bit binary strings 
-%           based on the Baudot (ITA2) code in Letters mode.
-%       decode_telegraph: uses the inverse of the Baudot code mapping to convert 
-%           5-bit binary strings back into their corresponding letters.
-%       AudioMorse: generates audio signal corresponding to the Morse code.
-%        the dashes 
-%       AudioTelegraph: the Mark (bit 1) and Space (bit 0) states are represented by two 
-%        audio tones of which the frequencies do not share a comman factor. 
-%        1500 Hz for '1' (mark), 1670 Hz for '0' (space) (170 Hz shift).
-%
-%   GUI Components:
-%       EditField: fields for text, Morse code, or Telegraph code.
-%       DropDown: DropDown to select between "Encode" and "Decode Morse" or "Decode Telegraph" modes.
-%       Button (convert): Button to start encoding or decoding of input.
-%       DropDown: DropDown to select between "Display Morse" and "Display Telegraph" modes.
-%       DropDown (waveform): Dropdown to select the waveform type (sin, sawtooth, square) for audio generator.
-%       Slider (speed): Slider to set the speed for the audio playback.
-%       Button (Play Audio): Button to play the code sound.
-%       Button (Display Audio): Button to display the Audio lines.
-%       UIAxes (Audio Lines): Area for plotting the code waveform.
-%
-%%---------------------------------------------------------------
-%%
-
-classdef Sim_8_4 < matlab.apps.AppBase
+classdef Sim_10_4 < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
@@ -120,7 +56,7 @@ classdef Sim_8_4 < matlab.apps.AppBase
                     for i = 1:length(inputText)
                         codes(i) = "0" + telegraph_code(inputText(i)) + "11";
                     end
-                    telegraphResult = join(codes, "");  % Start bit + data + two stop bits
+                    telegraphResult = join(codes, "'");  % Start bit + data + two stop bits
         
                     app.EditField_2.Value = morseResult;
                     app.EditField_Telegraph.Value = telegraphResult;
@@ -133,7 +69,7 @@ classdef Sim_8_4 < matlab.apps.AppBase
                     for i = 1:length(decodedText)
                         codes(i) = "0" + telegraph_code(decodedText(i)) + "11";
                     end
-                    telegraphResult = join(codes, "");  % Start bit + data + two stop bits
+                    telegraphResult = join(codes, "'");  % Start bit + data + two stop bits
         
                     app.EditField.Value = decodedText;
                     app.EditField_Telegraph.Value = telegraphResult;
@@ -194,6 +130,8 @@ classdef Sim_8_4 < matlab.apps.AppBase
             app.UIAxes.FontName = 'Arial';
             app.UIAxes.FontAngle = 'italic';
             app.UIAxes.FontUnits = 'points';
+            app.UIAxes.TitleFontSizeMultiplier = 1.2;
+            app.UIAxes.Box = 'on';
             app.UIAxes.Position = [91 36 299 195];
 
             % Create EditField
@@ -206,9 +144,9 @@ classdef Sim_8_4 < matlab.apps.AppBase
             % Create EditField_2
             app.EditField_2 = uieditfield(app.UIFigure, 'text');
             app.EditField_2.FontSize = 18;
-            app.EditField_2.Tooltip = {'Type Morse code using ''.'', ''-'' or ''_'', using spaces between letters and ''/'' between words.'};
+            app.EditField_2.Tooltip = {'Type Morse code using ''.'', ''-'' or ''_'', using apastrophe '' between letters and ''/'' between words.'};
             app.EditField_2.Position = [37 319 452 42];
-            app.EditField_2.Value = '... --- ...';
+            app.EditField_2.Value = '...''---''...';
 
             % Create PlayAudioButton
             app.PlayAudioButton = uibutton(app.UIFigure, 'push');
@@ -283,9 +221,9 @@ classdef Sim_8_4 < matlab.apps.AppBase
             app.EditField_Telegraph = uieditfield(app.UIFigure, 'text');
             app.EditField_Telegraph.ValueChangedFcn = createCallbackFcn(app, @EditField_TelegraphValueChanged, true);
             app.EditField_Telegraph.FontSize = 18;
-            app.EditField_Telegraph.Tooltip = {'Type Telegraph code according to ITA2 protocl for Baudot code (Supports Alphabets and space (00100)) such that each character consists of 5 data bits, preceeded by one start bit (0) and succeeded by two stop bits (11).'};
+            app.EditField_Telegraph.Tooltip = {'Type Telegraph code according to ITA2 protocl for Baudot code (Supports Alphabets and space (00100)) such that each character consists of 5 data bits, preceeded by one start bit (0) and succeeded by two stop bits (11). seperate each 8 bit code using apasttrophe '' .'};
             app.EditField_Telegraph.Position = [38 251 451 40];
-            app.EditField_Telegraph.Value = '000101110110001100010111';
+            app.EditField_Telegraph.Value = '00010111''01100011''00010111';
 
             % Create TextLabel
             app.TextLabel = uilabel(app.UIFigure);
@@ -335,7 +273,7 @@ classdef Sim_8_4 < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = Sim_8_4
+        function app = Sim_10_4
 
             % Create UIFigure and components
             createComponents(app)

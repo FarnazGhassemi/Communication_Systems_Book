@@ -261,7 +261,6 @@ end
 % Visualization
 figure;
 hold on;
-ylim([5,15]);
 bar(values, 'FaceColor', [0.8 0.2 0.6]);
 title('Entropy of Biosignals Comparing to Noise');
 ylabel('Entropy');
