@@ -110,7 +110,7 @@ noisy_signal = x + 0.05*randn(size(x));
 
 % Delta Modulation
     
-delta = 1;
+delta = 0.5;
 [dm_out, dm_pred] = delta_mod(x, delta);
 [dm_out1, dm_pred1] = delta_mod(noisy_signal, delta);
 
