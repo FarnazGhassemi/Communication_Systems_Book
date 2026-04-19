@@ -1,3 +1,17 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               Generating Eye Diagram for ECG                 %
+%               for Various Modulation Schemes                 %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                   Chapter 8 - Section                        %
+%                                                              %
+%                                                              %
+%   Version.1:             05/01/30                            %
+%   The first version Contributed voluntarily by Seyyed        %
+%   Abolfazl Mortazavi                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 close all
 clear all
 clc

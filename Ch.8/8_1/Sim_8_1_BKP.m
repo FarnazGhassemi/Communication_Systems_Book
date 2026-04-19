@@ -8,7 +8,6 @@
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
-%   Version.1:             05/01/30---S.A. Mortazavi           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function Sim_8_1
     close all
@@ -20,7 +19,7 @@ function Sim_8_1
     binaryInput = uicontrol('Style', 'edit', 'Position', [150 250 100 25], 'String', '101');
     
     uicontrol('Style', 'text', 'Position', [20 210 120 20], 'String', 'Modulation Type:');
-    modTypes = {'PAM-UniPolar', 'PAM-BBipolar', 'PDM', 'PPM', 'PCM (NRZ-L)','PCM (RZ)','PCM (AMI)'};
+    modTypes = {'PAM-UniPolar', 'PAM-BBipolar', 'PDM', 'PPM'};
     modMenu = uicontrol('Style', 'popupmenu', 'Position', [150 210 150 25], 'String', modTypes);
     
     uicontrol('Style', 'pushbutton', 'Position', [150 170 100 30], 'String', 'Modulate', 'Callback', @modulateSignal);
@@ -73,41 +72,6 @@ function Sim_8_1
                     plot(axesHandle, t((i-1)*100+1:i*100), signal((i-1)*100+1:i*100), 'Color', colors(i, :), 'LineWidth', 2);
                     line([t(i*100) t(i*100)], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1);
                     text(mean(t((i-1)*100+1:i*100)), bits(i) + 0.1, num2str(bits(i)), 'FontSize', 10, 'FontWeight', 'bold', 'Color', colors(i, :), 'HorizontalAlignment', 'center');
-                    hold(axesHandle, 'on');
-                end
-            case 5 % PCM (NRZ-L)
-                for i = 1:length(bits)
-                    signal((i-1)*100+1:i*100) = bits(i);
-                    plot(axesHandle, t((i-1)*100+1:i*100), signal((i-1)*100+1:i*100), 'Color', colors(i, :), 'LineWidth', 2);
-                    line([t(i*100) t(i*100)], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1);
-                    text(mean(t((i-1)*100+1:i*100)), bits(i) + 0.1, num2str(bits(i)), 'FontSize', 10, 'FontWeight', 'bold', 'Color', colors(i, :), 'HorizontalAlignment', 'center');
-                    hold(axesHandle, 'on');
-                end
-           case 6 % PCM (RZ) 
-                for i = 1:length(bits)
-                    if bits(i) == 1
-                        signal((i-1)*100+1:(i-1)*100+50) = 1;
-                        signal((i-1)*100+51:i*100) = 0;
-                    else
-                        signal((i-1)*100+1:i*100) = 0;
-                    end
-                    plot(axesHandle, t((i-1)*100+1:i*100), signal((i-1)*100+1:i*100), 'Color', colors(i, :), 'LineWidth', 2);
-                    line([t(i*100) t(i*100)], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1);
-                    text(mean(t((i-1)*100+1:i*100)), bits(i) + 0.1, num2str(bits(i)), 'FontSize', 10, 'FontWeight', 'bold', 'Color', colors(i, :), 'HorizontalAlignment', 'center');
-                    hold(axesHandle, 'on');
-                end     
-           case 7 % PCM (Bipolar AMI)
-                polarity = -1;
-                for i = 1:length(bits)
-                    if bits(i) == 1
-                        polarity = -polarity; % Flip polarity for each '1'
-                        signal((i-1)*100+1:i*100) = polarity;
-                    else
-                        signal((i-1)*100+1:i*100) = 0; % '0' is always 0
-                    end
-                    plot(axesHandle, t((i-1)*100+1:i*100), signal((i-1)*100+1:i*100), 'Color', colors(i, :), 'LineWidth', 2);
-                    line([t(i*100) t(i*100)], [-1 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1); 
-                    text(mean(t((i-1)*100+1:i*100)), signal((i-1)*100+50) + 0.15, num2str(bits(i)), 'FontSize', 10, 'FontWeight', 'bold', 'Color', colors(i, :), 'HorizontalAlignment', 'center');
                     hold(axesHandle, 'on');
                 end
         end
