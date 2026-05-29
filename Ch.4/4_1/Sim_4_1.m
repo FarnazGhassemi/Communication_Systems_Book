@@ -320,21 +320,21 @@ ylabel('Magnitude')
 title('The Mixed Signal')
 grid on
 hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  close(gcf)
-end
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            Save Figures                                 %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PM=cd;
+% FolderName = [PM,'\PNG\']   % Your destination folder
+% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+% for iFig = 1:length(FigList)
+%   FigHandle = FigList(iFig);
+%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
+%   %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
+%   FigName   = num2str(get(FigHandle, 'Number'))
+%   set(0, 'CurrentFigure', FigHandle);
+%   savefig(gcf, [FolderName, FigName, '.fig']);
+%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
+%   close(gcf)
+% end
 
