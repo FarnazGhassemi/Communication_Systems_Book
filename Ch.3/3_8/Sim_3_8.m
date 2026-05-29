@@ -10,8 +10,9 @@
 %   Version.2:             03/09/03---Dr.Ghassemi              %
 %   Version.1:             02/08/14                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+load("Data.mat")
+A1=Data;
 %A1=A(:,1);
-%A1=Data;
 fs = 256;
 t = (0:length(A1)-1) / fs; 
 
@@ -47,14 +48,14 @@ fft_y = abs(fft(y));   % Magnitude of FFT of the nonlinear signal
 % Plot the frequency spectra
 figure;
 subplot(2, 1, 1);
-plot(f(1:n/2), fft_A1(1:n/2), 'b', 'LineWidth', 1.5);
+plot(f(1:floor(n/2)), fft_A1(1:floor(n/2)), 'b', 'LineWidth', 1.5);
 xlabel('Frequency (Hz)', 'FontSize', 12, 'FontWeight', 'bold');
 ylabel('Magnitude', 'FontSize', 12, 'FontWeight', 'bold');
 title('Frequency Spectrum of Original Signal', 'FontSize', 14, 'FontWeight', 'bold');
 grid on;
 
 subplot(2, 1, 2);
-plot(f(1:n/2), fft_y(1:n/2), 'r', 'LineWidth', 1.5);
+plot(f(1:floor(n/2)), fft_y(1:floor(n/2)), 'r', 'LineWidth', 1.5);
 xlabel('Frequency (Hz)', 'FontSize', 12, 'FontWeight', 'bold');
 ylabel('Magnitude', 'FontSize', 12, 'FontWeight', 'bold');
 title('Frequency Spectrum After Nonlinear Element', 'FontSize', 14, 'FontWeight', 'bold');
