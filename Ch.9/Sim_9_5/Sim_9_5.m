@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Illustrating Chapter 10 Digital Modulation :         %
+%         Illustrating Chapter 9 Digital Modulation :          %
 %                                 ASK Modulation               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 10                          %
+%                          Chapter 9                           %
 %                                                              %
 %                                                              %
 %   Version.1:             03/10/27---Dr.Ghassemi              %
@@ -16,7 +16,7 @@ colors=[0,0,0;                       %1-Black
         0,0,0.75;                    %2-Blue
         214/255,39/255,40/255;       %3-Red
         15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;     %5-Purple
+        118/255,78/255,159/255;      %5-Purple
         225/255,124/255,5/255;       %6-Orange
         56/255,166/255,165/255;      %7-Light Blue
         204/255,80/255,62/255;       %8-Light Red
@@ -334,20 +334,20 @@ title('The ASK Modulated Signal')
 grid on
 hold on
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                            Save Figures                                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PM=cd;
-FolderName = [PM,'\PNG\']   % Your destination folder
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
-  FigHandle = FigList(iFig);
-  set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-  %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
-  FigName   = num2str(get(FigHandle, 'Number'))
-  set(0, 'CurrentFigure', FigHandle);
-  savefig(gcf, [FolderName, FigName, '.fig']);
-  print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-  %close(gcf)
-end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            Save Figures                                 %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PM=cd;
+% FolderName = [PM,'\PNG\']   % Your destination folder
+% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+% for iFig = 1:length(FigList)
+%   FigHandle = FigList(iFig);
+%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
+%   %FigName   = [num2str(iFig)]%;get(FigHandle, 'Name');
+%   FigName   = num2str(get(FigHandle, 'Number'))
+%   set(0, 'CurrentFigure', FigHandle);
+%   savefig(gcf, [FolderName, FigName, '.fig']);
+%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
+%   %close(gcf)
+% end
 

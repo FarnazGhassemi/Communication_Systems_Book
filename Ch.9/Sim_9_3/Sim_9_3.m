@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 9-3:              %
+%                   Illustrating Simulation 9-3:               %
 %                     Shift Keying Modulations                 %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 10-Section                       %
+%                     Chapter 9-Section                        %
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %

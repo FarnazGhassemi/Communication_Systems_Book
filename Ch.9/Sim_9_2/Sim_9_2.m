@@ -4,7 +4,7 @@
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                   Chapter 9 - Section                       %
+%                   Chapter 9 - Section                        %
 %                                                              %
 %                                                              %
 %   Version1:             03/03/30                             %

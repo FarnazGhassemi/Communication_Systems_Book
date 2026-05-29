@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Illustrating Chapter 10 Digital Modulation :         %
+%         Illustrating Chapter 9 Digital Modulation :          %
 %                                 FSK Modulation               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 10                          %
+%                          Chapter 9                           %
 %                                                              %
 %                                                              %
 %   Version.1:             03/10/27---Dr.Ghassemi              %

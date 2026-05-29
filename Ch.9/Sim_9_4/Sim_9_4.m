@@ -1,15 +1,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 9-4:              %
+%                   Illustrating Simulation 9-4:               %
 %                     Shift Keying Modulations                 %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 10-Section                       %
+%                     Chapter 9-Section                        %
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function varargout = Sim_9_4(varargin)
+function varargout = digital_modulation(varargin)
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
