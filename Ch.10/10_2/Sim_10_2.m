@@ -1,3 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 10-2:              %
+%           Entropy of Biosignals comparing to noise           %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 10-Section                       %
+%                                                              %
+%                                                              %
+%   Version.1:             04/03/03---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%---------------------------------------------------------------
 % Generate alpha values
 a = linspace(0, 1, 1000);
 

@@ -1,3 +1,15 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 10-4:              %
+%           Entropy of Biosignals comparing to noise           %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 10-Section                       %
+%                                                              %
+%                                                              %
+%   Version.1:             04/03/03---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%---------------------------------------------------------------
 classdef Sim_10_4 < matlab.apps.AppBase
 
     % Properties that correspond to app components

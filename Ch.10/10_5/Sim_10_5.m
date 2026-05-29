@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 8-5:               %
+%                   Illustrating Simulation 10-5:              %
 %           Entropy of Biosignals comparing to noise           %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 8-Section                        %
+%                     Chapter 10-Section                       %
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
@@ -33,7 +33,7 @@ if (m==0)
 else
     disp('Number of Auto-Coding? (1 to 4)')
     disp('1: Full English Alphabet')
-    disp('2: Full Nunbers')
+    disp('2: Full Numbers')
     disp('3: A T SH K L M v')
     disp('4: b i o e n g r')
     k=input('?');

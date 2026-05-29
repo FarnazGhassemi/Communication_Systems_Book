@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 8-1:               %
+%                   Illustrating Simulation 10-1:              %
 %           Entropy of Biosignals comparing to noise           %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 8-Section                        %
+%                     Chapter 10-Section                       %
 %                                                              %
 %                                                              %
 %   Version.1:             04/03/03---Dr.Ghassemi              %
@@ -170,22 +170,6 @@ disp(['Entropy of EMG signal: ', num2str(entropy)]);
 
 values(end+1) = entropy;
 labels{end+1} = 'EMG signal';
-
-% Load EEG Signal
-load('EEG.mat'); 
-m=EEG;
-fs = 450;         % Sampling frequency
-% Limit to first 3 seconds
-N = min(length(m), t0 * fs);
-t = (0:N-1) /fs;
-m = m(1:N);
-% 
-symbols = unique(m);
-counts = histcounts(m, [symbols]);
-p = counts / length(m);
-% 
-entropy = -sum(p .* log2(p)); 
-%disp(['Entropy of EEG signal: ', num2str(entropy)]);
 
 %values(end+1) = entropy;
 %labels{end+1} = 'EEG signal';
