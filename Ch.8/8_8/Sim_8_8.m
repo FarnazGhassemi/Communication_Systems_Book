@@ -1,12 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 9-8:               %
-%                PCM Modulation for Biomedical Signal          %
+%                   Illustrating Simulation 8-8:               %
+%                PPM Modulation for Biomedical Signal          %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 9-Section                        %
+%                     Chapter 8-Section                        %
 %                                                              %
-%   Version.1:          04/03/10---Dr.Ghassemi, ZTabanfar      %
+%   Version.3:             04/02/27---Dr.Ghassemi              %
+%   Version.2:             03/09/03---Dr.Ghassemi              %
+%   Version.1:             96/06/30---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%---------------------------------------------------------------
 
@@ -57,107 +59,116 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 
 % Box Style for Axe
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-%%--------------------------------------------------------------
+%%---------------------------------------------------------------
 %% Load biomedical signal
-load('IP.mat'); 
+load('IP.mat');
 fs = 125;       % Sampling frequency
 t0=10;           % Signal Selected Time in Seconds
 IP=IP(1:t0*fs);
 t = (0:length(IP)-1)/fs;
-%% PCM Parameters
-pcm_rate = input('Enter the PCM sampling rate (Hz, e.g., 10): ');
-Ts = 1/pcm_rate;
-samples_per_symbol = round(fs * Ts);
-n_symbols = floor(length(IP) / samples_per_symbol);
 
-% Sampling
-sample_indices = 1:samples_per_symbol:(n_symbols * samples_per_symbol);
-IP_sampled = IP(sample_indices);
-t_sampled = t(sample_indices);
+%% User Input
+ppm_rate = input('Enter PPM rate (Hz, e.g., 10): ');
+Ts = 1/ppm_rate;
+samples_per_slot = round(fs * Ts);
+n_slots = floor(length(IP) / samples_per_slot);
+IP_sampled = IP(1:n_slots * samples_per_slot); % Trim to full slots
+t = t(1:length(IP));
 
-% Quantization
-n_bits = input('Enter number of quantization bits (e.g., 4): ');
-L = 2^n_bits;
-xmin = min(IP);
-xmax = max(IP);
-q_step = (xmax - xmin) / L;
-partition = xmin + q_step * (1:L-1);
-codebook = xmin + q_step/2 + q_step * (0:L-1);
-
-[index, q_signal] = quantiz(IP_sampled, partition, codebook);
-index(index == 0) = 1;  % Adjust for MATLAB 1-based indexing
-encoded_bin = dec2bin(index - 1, n_bits);  % Encoding step (binary)
-
-%% Channel noise (optional)
 add_noise = input('Do you want to add channel noise? (y/n): ', 's');
-add_noise = lower(add_noise);
-if or((add_noise=='y') ,(add_noise=='Y'))
-    add_noise=true;
+if lower(add_noise) == 'y'
+    snr_dB = input('Enter SNR (in dB, e.g., 20): ');
+    noise_enabled = true;
 else
-    add_noise=false;
-end
-if add_noise 
-    noise_power_dB = input('Enter noise power in dB (e.g., -20): ');
-    noise_power = 10^(noise_power_dB / 10);
-    noise = sqrt(noise_power) * randn(size(q_signal));
-    q_received = q_signal + noise;
-else
-    q_received = q_signal;
+    noise_enabled = false;
 end
 
-%% Reconstruction using Zero-Order Hold (ZOH)
-t_interp = t;
-reconstructed = interp1(t_sampled, q_received, t_interp, 'previous', 'extrap');
+%% Normalize sampled signal to range [0, 1] for delay mapping
+IP_norm = (IP_sampled - min(IP_sampled)) / (max(IP_sampled) - min(IP_sampled));
+
+% Time for full simulation
+ppm_signal = zeros(1, length(IP));
+delay_range = samples_per_slot - 1; % Maximum pulse delay per slot
+
+%% Generate PPM Signal
+for k = 1:n_slots
+    idx = (k-1)*samples_per_slot + 1;
+    sample_value = IP_norm(idx); % Use first sample in slot
+    delay = round(sample_value * delay_range); % Map to delay
+    pulse_index = idx + delay;
+    ppm_signal(pulse_index) = 1;
+end
+
+%% Add Channel Noise (optional)
+if noise_enabled
+    signal_power = mean(ppm_signal.^2);
+    snr_linear = 10^(snr_dB/10);
+    noise_power = signal_power / snr_linear;
+    noise = sqrt(noise_power) * randn(size(ppm_signal));
+    ppm_noisy = ppm_signal + noise;
+else
+    ppm_noisy = ppm_signal;
+end
+
+%% PPM Reconstruction
+recon = zeros(1, n_slots);
+
+for k = 1:n_slots
+    idx = (k-1)*samples_per_slot + 1;
+    [~, pulse_pos] = max(ppm_noisy(idx:idx+delay_range));
+    delay = pulse_pos - 1; % zero-based delay
+    amplitude = delay / delay_range;
+    recon(k) = amplitude;
+end
+
+% Interpolate to original time scale
+recon_time = (0:n_slots-1) * Ts;
+recon_full = interp1(recon_time, recon, t, 'linear');
+
+% Denormalize
+recon_full = recon_full * (max(IP) - min(IP)) + min(IP);
 
 %% Plotting
-figure('Color','w','Position',[100 100 900 700]);
+figure;
 tlim = [0 t(end)];
 plot(t, IP, 'Color', colors(2,:), 'LineWidth', 2);
-title('Original Signal');
-xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-xlim(tlim);
+title('Original Biomedical Signal'); xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
 figure
-if add_noise
+if noise_enabled
     subplot(3,1,1);
-    stem(t_sampled, IP_sampled, 'filled', 'Color', colors(3,:));
-    title('Sampled Signal');
+    plot(t, ppm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PPM Modulated Signal');
     xlabel('Time (s)'); ylabel('Amplitude'); grid on;
     xlim(tlim);
     
     subplot(3,1,2);
-    stairs(t_sampled, q_signal, 'Color', colors(6,:), 'LineWidth', 2); 
-    hold on;
-    plot(t_sampled, q_received, 'Color', colors(5,:), 'LineWidth', 1.5);
-    title(['Quantized and Received Signal (Noise: ' num2str(noise_power_dB) ' dB)']);
-    legend('Quantized', 'Noisy');
-    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-    xlim(tlim);
+    plot(t, ppm_noisy, 'Color', colors(5,:), 'LineWidth', 2);
+    if noise_enabled
+        title(['Noisy PPM Signal (SNR = ' num2str(snr_dB) ' dB)']);
+    else
+        title('PPM Signal (No Noise)');
+    end
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
     
     subplot(3,1,3);
-    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2); hold on;
+    plot(t, recon_full, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
     plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
-    legend('Reconstructed (ZOH)', 'Original');
-    title('Reconstructed Signal using ZOH');
-    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-    xlim(tlim);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
 else
-    subplot(3,1,1);
-    stem(t_sampled, IP_sampled, 'filled', 'Color', colors(3,:));
-    title('Sampled Signal');
+    subplot(2,1,1);
+    plot(t, ppm_signal, 'Color', colors(3,:), 'LineWidth', 2);
+    title('PPM Modulated Signal');
     xlabel('Time (s)'); ylabel('Amplitude'); grid on;
     xlim(tlim);
-    
-    subplot(3,1,2);
-    stairs(t_sampled, q_signal, 'Color', colors(6,:), 'LineWidth', 2); 
-    title('Quantized Signal (No Noise)');
-    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-    xlim(tlim);
-    
-    subplot(3,1,3);
-    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2); hold on;
+      
+    subplot(2,1,2);
+    plot(t, recon_full, 'Color', colors(4,:), 'LineWidth', 2);
+    hold on
     plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
-    legend('Reconstructed (ZOH)', 'Original');
-    title('Reconstructed Signal using ZOH');
-    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-    xlim(tlim);
+    legend ('Reconstructed Signal','Original Signal');
+    title('Reconstructed Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);
 end

@@ -1,198 +1,163 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  GUI for Signal Quantization and Delta Modulation Comparison %
+%                   Illustrating Simulation 8-9:               %
+%                PCM Modulation for Biomedical Signal          %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
-%                     By: Dr.Farnaz Ghassemi                   %
-%                   Chapter 9 - Chapter                        %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 8-Section                        %
 %                                                              %
-%                                                              %
-%   Version1:             03/03/30                             %
-%   The first version Contributed voluntarily by               %
-%   Arash Haeri Moghadam as an activity for the related course.%
+%   Version.1:          04/03/10---Dr.Ghassemi, ZTabanfar      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%------------------------- Discription ------------------------
-%%  This MATLAB function simulates the process of quantizing an analog 
-%   signal and computes the Signal-to-Noise Ratio (SNR) for both normal 
-%   quantization and delta modulation. It also allows the user to select 
-%   various types of analog signals, modify signal parameters, and 
-%   visualize the results using a GUI. The user can choose the type of 
-%   analog signal, frequency, duration, number of quantization bits, and 
-%   other parameters, and the function will calculate and display the SNR 
-%   for both quantization methods.
-%   Inputs:
-%   - Numeric Edit Fields to enter parameters: (Analog Signal Frequency (Hz), 
-%   Analog Signal Duration (seconds), Number of Quantization Bits, 
-%   Initial Delta for Delta Modulation).
-%   - Dropdown List To Select An Analog Signal Type: (e.g., Sine, Cosine, Rectangular, etc.).
-%   - Check Box To Add Noise: The user can check this box to add Gaussian noise to the analog signal.
-%   Outputs:
-%   - Quantization: The function plots four figures showing:
-%       - The original analog signal.
-%       - The normal quantized signal.
-%       - The delta modulated signal.
-%       - A comparison of the quantized points from normal quantization and 
-%         delta modulation.
-%   - SNR Calculation: The function calculates the SNR for both the normal 
-%   quantized signal and the delta modulated signal and displays the 
-%   results in a pop-up message.
 %%---------------------------------------------------------------
-%%
-function Sim_8_9()
 
-    % GUI
-    fig = uifigure('Name', 'Quantization and SNR', 'Position', [100 100 500 450]);
-    function_label = uilabel(fig, 'Text', 'Analog Signal Type:', 'Position', [50 370 200 22]);
-    function_choice = uidropdown(fig, 'Items', {'Sine', 'Cosine', 'Rectangular', 'Triangular', 'Exponential', 'Square Pulse', 'Sawtooth', 'Linear'}, 'Position', [200 370 150 22]);
-    frequency_label = uilabel(fig, 'Text', 'Analog Signal Frequency (Hz):', 'Position', [50 330 200 22]);
-    frequency_entry = uieditfield(fig, 'numeric', 'Position', [250 330 150 22] , 'Value',10 );
-    duration_label = uilabel(fig, 'Text', 'Analog Signal Duration (seconds):', 'Position', [50 290 200 22]);
-    duration_entry = uieditfield(fig, 'numeric', 'Position', [250 290 150 22], 'Value',5);
-    num_bits_label = uilabel(fig, 'Text', 'Number of Quantization Bits:', 'Position', [50 250 200 22]);
-    num_bits_entry = uieditfield(fig, 'numeric', 'Position', [250 250 150 22], 'Value',8);
-    initial_delta_label = uilabel(fig, 'Text', 'Initial Delta for Delta Modulation:', 'Position', [50 210 200 22]);
-    initial_delta_entry = uieditfield(fig, 'numeric', 'Position', [250 210 150 22], 'Value', 0.5);
-    noise_checkbox = uicheckbox(fig, 'Text', 'Add Noise', 'Position', [50 170 200 22]);
-    calculate_button = uibutton(fig, 'push', 'Text', 'Quantization and SNR', 'Position', [170 120 160 30], 'ButtonPushedFcn', @(btn,event) calculate_snr());
-   
-    % User Input
-    function calculate_snr()
-       
-        func_type = function_choice.Value;
-        frequency = frequency_entry.Value;
-        duration = duration_entry.Value;
-        num_bits = num_bits_entry.Value;
-        initial_delta = initial_delta_entry.Value;
-        add_noise = noise_checkbox.Value;
+% close all;10
+% clear;
+% clc;
+colors=[0,0,0;                       %1-Black
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;      %5-Purple
+        225/255,124/255,5/255;       %6-Orange
+        56/255,166/255,165/255;      %7-Light Blue
+        204/255,80/255,62/255;       %8-Light Red
+        115/255,175/255,72/255;      %9-Light Green
+        237/255,173/255,8/255;       %10-Light Orange
+        148/255,52/255,110/255;      %11-Light Purple
+        70/255,0,114/255;            %12-Dark Blue
+        0,0.5,0.25                   %13-Green
+        ];
+grayColor = [0.5, 0.5, 0.5];
+marks={'-';'--';':';'-.'};
 
-        % Validatation
-        if frequency <= 0
-            uialert(fig, 'Frequency must be greater than 0', 'Input Error', 'Icon', 'error');
-            return;
-        end
-        if duration <= 0
-            uialert(fig, 'Duration must be greater than 0', 'Input Error', 'Icon', 'error');
-            return;
-        end
-        if num_bits <= 0
-            uialert(fig, 'Number of quantization bits must be greater than 0', 'Input Error', 'Icon', 'error');
-            return;
-        end
-        if initial_delta <= 0
-            uialert(fig, 'Initial delta must be greater than 0', 'Input Error', 'Icon', 'error');
-            return;
-        end
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
-        Fs = 10 * frequency; % sampling rate
-        t = 0:1/Fs:duration-1/Fs;
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
 
-        % Analog signal
-        switch func_type
-            case 'Sine'
-                x_analog = sin(2*pi*frequency*t);
-            case 'Cosine'
-                x_analog = cos(2*pi*frequency*t);
-            case 'Rectangular'
-                x_analog = double(mod(floor(frequency*t), 2) == 0);
-            case 'Triangular'
-                x_analog = sawtooth(2*pi*frequency*t, 0.5);
-            case 'Exponential'
-                x_analog = exp(-frequency*t);
-            case 'Square Pulse'
-                x_analog = square(2*pi*frequency*t);
-            case 'Sawtooth'
-                x_analog = sawtooth(2*pi*frequency*t);
-            case 'Linear'
-                x_analog = t;
-        end
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
 
-        if add_noise
-            noise = 0.1 * randn(size(t)); % white Gaussian noise
-            x_analog = x_analog + noise;
-        end
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
 
-        % Normal Quantization
-        L = 2^num_bits; % Quantization levels
-        x_min = min(x_analog);
-        x_max = max(x_analog);
-        delta = (x_max - x_min) / (L-1); % Quantization step size
-        x_digital = round((x_analog - x_min) / delta) * delta + x_min;
-        noise_normal = x_analog - x_digital;
-        SNR_quantized_normal = snr(x_digital, noise_normal);
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
 
-        % Delta Modulation
-        x_delta = zeros(1, length(t));
-        x_delta(1) = x_analog(1);
-        delta = initial_delta;
-       
-        for i = 2:length(t)
-            if x_analog(i) > x_delta(i-1)
-                x_delta(i) = x_delta(i-1) + delta;
-            else
-                x_delta(i) = x_delta(i-1) - delta;
-            end
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+%%--------------------------------------------------------------
+%% Load biomedical signal
+load('IP.mat'); 
+fs = 125;       % Sampling frequency
+t0=10;           % Signal Selected Time in Seconds
+IP=IP(1:t0*fs);
+t = (0:length(IP)-1)/fs;
+%% PCM Parameters
+pcm_rate = input('Enter the PCM sampling rate (Hz, e.g., 10): ');
+Ts = 1/pcm_rate;
+samples_per_symbol = round(fs * Ts);
+n_symbols = floor(length(IP) / samples_per_symbol);
 
-            % Adaptive delta
-            delta = delta * 1.2 * (abs(x_analog(i) - x_delta(i-1)) / delta);
-        end
+% Sampling
+sample_indices = 1:samples_per_symbol:(n_symbols * samples_per_symbol);
+IP_sampled = IP(sample_indices);
+t_sampled = t(sample_indices);
 
-        noise_delta = x_analog - x_delta;
-        SNR_quantized_delta = snr(x_delta, noise_delta);
+% Quantization
+n_bits = input('Enter number of quantization bits (e.g., 4): ');
+L = 2^n_bits;
+xmin = min(IP);
+xmax = max(IP);
+q_step = (xmax - xmin) / L;
+partition = xmin + q_step * (1:L-1);
+codebook = xmin + q_step/2 + q_step * (0:L-1);
 
-        % Plotting
-        figure;
-        subplot(4, 1, 1);
-        plot(t, x_analog);
-        title(['Original Analog Signal (' func_type ')']);
-        xlabel('Time (seconds)');
-        ylabel('Signal Value');
-        xlim([0 1]); %x-axis limit to 1 second
-        grid on;
+[index, q_signal] = quantiz(IP_sampled, partition, codebook);
+index(index == 0) = 1;  % Adjust for MATLAB 1-based indexing
+encoded_bin = dec2bin(index - 1, n_bits);  % Encoding step (binary)
 
-        subplot(4, 1, 2);
-        plot(t, x_analog, 'b', 'LineWidth', 1);
-        hold on;
-        stem(t, x_digital, 'r', 'LineWidth', 1, 'MarkerSize', 4); % Plot quantized signal
-        title(['Normal Quantized Signal (' num2str(num_bits) ' bits)']);
-        xlabel('Time (seconds)');
-        ylabel('Quantized Signal Value');
-        legend('Analog Signal', 'Quantized Signal');
-        xlim([0 1]); %x-axis limit to 1 second
-        hold off;
-        grid on;
+%% Channel noise (optional)
+add_noise = input('Do you want to add channel noise? (y/n): ', 's');
+add_noise = lower(add_noise);
+if or((add_noise=='y') ,(add_noise=='Y'))
+    add_noise=true;
+else
+    add_noise=false;
+end
+if add_noise 
+    noise_power_dB = input('Enter noise power in dB (e.g., -20): ');
+    noise_power = 10^(noise_power_dB / 10);
+    noise = sqrt(noise_power) * randn(size(q_signal));
+    q_received = q_signal + noise;
+else
+    q_received = q_signal;
+end
 
-        subplot(4, 1, 3);
-        plot(t, x_analog, 'b', 'LineWidth', 1);
-        hold on;
-        stem(t, x_delta, 'r', 'LineWidth', 1, 'MarkerSize', 4); % Plot delta modulated signal
-        title('Delta Modulated Signal');
-        xlabel('Time (seconds)');
-        ylabel('Delta Signal Value');
-        legend('Analog Signal', 'Delta Modulated Signal');
-        xlim([0 1]); %x-axis limit to 1 second
-        hold off;
-        grid on;
+%% Reconstruction using Zero-Order Hold (ZOH)
+t_interp = t;
+reconstructed = interp1(t_sampled, q_received, t_interp, 'previous', 'extrap');
 
-        subplot(4, 1, 4);
-        stem(t, x_digital, 'r', 'LineWidth', 1.5, 'MarkerSize', 4);
-        hold on;
-        stem(t, x_delta, 'g', 'LineWidth', 1.5, 'MarkerSize', 4);
-        title('Quantized Points Comparison');
-        xlabel('Time (seconds)');
-        ylabel('Quantized Signal Value');
-        legend('Normal Quantization', 'Delta Modulation');
-        xlim([0 1]); %x-axis limit to 1 second
-        hold off;
-        grid on;
-
-        %zoom and pan
-        h = zoom;
-        set(h,'Motion','horizontal','Enable','on');
-
-        h = pan;
-        set(h,'Motion','horizontal','Enable','on');
-
-        % Display SNR
-        msg = sprintf('SNR for Normal Quantized Signal: %.2f dB\nSNR for Delta Modulated Signal: %.2f dB', SNR_quantized_normal, SNR_quantized_delta);
-        uialert(fig, msg, 'Result', 'Icon', 'info');
-    end
+%% Plotting
+figure('Color','w','Position',[100 100 900 700]);
+tlim = [0 t(end)];
+plot(t, IP, 'Color', colors(2,:), 'LineWidth', 2);
+title('Original Signal');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+xlim(tlim);
+figure
+if add_noise
+    subplot(3,1,1);
+    stem(t_sampled, IP_sampled, 'filled', 'Color', colors(3,:));
+    title('Sampled Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,2);
+    stairs(t_sampled, q_signal, 'Color', colors(6,:), 'LineWidth', 2); 
+    hold on;
+    plot(t_sampled, q_received, 'Color', colors(5,:), 'LineWidth', 1.5);
+    title(['Quantized and Received Signal (Noise: ' num2str(noise_power_dB) ' dB)']);
+    legend('Quantized', 'Noisy');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,3);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2); hold on;
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend('Reconstructed (ZOH)', 'Original');
+    title('Reconstructed Signal using ZOH');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+else
+    subplot(3,1,1);
+    stem(t_sampled, IP_sampled, 'filled', 'Color', colors(3,:));
+    title('Sampled Signal');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,2);
+    stairs(t_sampled, q_signal, 'Color', colors(6,:), 'LineWidth', 2); 
+    title('Quantized Signal (No Noise)');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
+    
+    subplot(3,1,3);
+    plot(t, reconstructed, 'Color', colors(4,:), 'LineWidth', 2); hold on;
+    plot(t, IP, 'Color', colors(2,:), 'LineWidth', 1);
+    legend('Reconstructed (ZOH)', 'Original');
+    title('Reconstructed Signal using ZOH');
+    xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+    xlim(tlim);
 end
