@@ -63,6 +63,12 @@ set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 
 PM=cd;
 load([PM,'\ECG_Sample.mat'])
+ECG_signal = data(:);  % Convert to column vector
+N = length(ECG_signal);  % Number of samples
+t = linspace(0, 5, N);  % Assume a 5-second duration
+% Limit to 3 seconds for plotting
+t_plot = t(t <= 3);
+N_plot = length(t_plot);
 
 alpha=5;
 d1=6;
@@ -71,20 +77,26 @@ l1=1/10^(d1*alpha/10);
 l2=1/10^(d2*alpha/10);
 figure;
 subplot(3,1,1)
-plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(t_plot, ECG_signal(1:N_plot),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,2)
-plot(data(1,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
+plot(t_plot, ECG_signal(1:N_plot)*l1*500,'Color', colors(3,:),'LineWidth', 2)
 title(['ECG Signal-Attenuated with ',num2str(d1),'m cable(\alpha=5)'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude*(500)', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,3)
-plot(data(1,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
+plot(t_plot, ECG_signal(1:N_plot)*l2*200000,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal-Attenuated with ',num2str(d2),'m cable(\alpha=5)'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude*(2*10e+5)', 'FontSize', 14, 'FontWeight', 'bold');
 ylim([-3, 9])
 hold on
 grid on
@@ -93,65 +105,87 @@ grid on
 %                           Distortion                                    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-PM=cd;
-load([PM,'\ECG_Sample.mat'])
+%% 🔴 Apply Nonlinear Distortion (Sigmoid Function)
+sigmoid = @(x) 1 ./ (1 + exp(-3*x)) ;  % Sigmoid function
+ECG_nonlinear_distorted = sigmoid(ECG_signal); % Apply nonlinear transformation
 
-alpha=5;
-d1=6;
-d2=d1*2;
-l1=1/10^(d1*alpha/10);
-l2=1/10^(d2*alpha/10);
+%% 📊 Plot Original and Distorted ECG Signals
 figure;
-subplot(3,1,1)
-plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
-title('Original ECG Signal')
-hold on
+
+subplot(3,1,1);
+plot(t_plot, ECG_signal(1:N_plot), 'Color', colors(2,:), 'LineWidth', 2, 'LineStyle', marks{1}); 
+title('Original ECG Signal', 'FontSize', 16, 'FontWeight', 'bold');
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
+grid on;
 ylim([-3, 9])
-grid on
-subplot(3,1,2)
-plot(data(1,1:1500)*l1,'Color', colors(3,:),'LineWidth', 2)
-title(['ECG Signal-Attenuated with ',num2str(d1),'m cable(\alpha=5)'])
-hold on
-ylim([-3, 9])
-grid on
-subplot(3,1,3)
-plot(data(1,1:1500)*l2,'Color', colors(4,:),'LineWidth', 2)
-title(['ECG Signal-Attenuated with ',num2str(d2),'m cable(\alpha=5)'])
-ylim([-3, 9])
-hold on
-grid on
+
+subplot(3,1,2);
+plot(t_plot, ECG_nonlinear_distorted(1:N_plot), 'Color', colors(3,:), 'LineWidth', 2, 'LineStyle', marks{1}); 
+title('ECG with Nonlinear Distortion - (Sigmoid Function)', 'FontSize', 16, 'FontWeight', 'bold');
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
+grid on;
+ylim([-0.2, 1.2])
+
+%% 🔴 Apply Nonlinear Distortion (Sigmoid Function)
+sigmoid = @(x) 1./ exp(2*x);  % Exponential function
+ECG_nonlinear_distorted = sigmoid(ECG_signal); % Apply nonlinear transformation
+
+
+subplot(3,1,3);
+plot(t_plot, ECG_nonlinear_distorted(1:N_plot), 'Color', colors(4,:), 'LineWidth', 2, 'LineStyle', marks{1}); 
+title('ECG with Nonlinear Distortion - (1/exp(2x) Function)', 'FontSize', 16, 'FontWeight', 'bold');
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
+grid on;
+ylim([-3, 40])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           Inteference                                   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load('Breath_Sample.mat')
+N = length(ECG_signal); ;  % Number of samples
+t = linspace(0, 5, N);  % Assume a 5-second duration
+% Limit to 3 seconds for plotting
+t_plot = t(t <= 3);
+N_plot = length(t_plot);
+
 n1=1;
 n2=8;
-Int1 =n1*data2(1,1:1500);
-Int2 =n2*data2(1,1:1500);
+Int1 =n1*data2(1,1:N_plot);
+Int2 =n2*data2(1,1:N_plot);
 figure;
 subplot(4,1,1)
-plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
 subplot(4,1,2)
-plot(data2(1,1:1500),'Color', colors(3,:),'LineWidth', 2)
+plot(t_plot, data2(1:N_plot),'Color', colors(3,:),'LineWidth', 2)
 title('Respiratory Artifact')
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-2.5, 2])
 grid on
 
 subplot(4,1,3)
-plot(data(1,1:1500)+Int1,'Color', colors(4,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot)+Int1,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal + Low Interfernce of Breathing signal'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-5, 10])
 grid on
 subplot(4,1,4)
-plot(data(1,1:1500)+Int2,'Color', colors(5,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot)+Int2,'Color', colors(5,:),'LineWidth', 2)
 title(['ECG Signal + High Interfernce of Breathing signal'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-15, 20])
 grid on
@@ -161,24 +195,30 @@ grid on
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 n1=0.1;
 n2=5;
-noise1 = wgn( 1, 1500 , n1 );
-noise2 = wgn( 1, 1500 , n2 );
+noise1 = wgn( 1, N_plot , n1 );
+noise2 = wgn( 1, N_plot , n2 );
 figure;
 subplot(3,1,1)
-plot(data(1,1:1500),'Color', colors(2,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot),'Color', colors(2,:),'LineWidth', 2)
 title('Original ECG Signal')
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,2)
-plot(data(1,1:1500)+noise1,'Color', colors(3,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot)+noise1,'Color', colors(3,:),'LineWidth', 2)
 title(['ECG Signal + Noise(',num2str(n1),'dBW)'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
 subplot(3,1,3)
-plot(data(1,1:1500)+noise2,'Color', colors(4,:),'LineWidth', 2)
+plot(t_plot, data(1:N_plot)+noise2,'Color', colors(4,:),'LineWidth', 2)
 title(['ECG Signal + Noise(',num2str(n2),'dBW)'])
+xlabel('Time (s)', 'FontSize', 14, 'FontWeight', 'bold');
+ylabel('Amplitude', 'FontSize', 14, 'FontWeight', 'bold');
 hold on
 ylim([-3, 9])
 grid on
