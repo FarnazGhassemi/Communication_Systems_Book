@@ -1,138 +1,268 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 7-1:               %
-%                     Types of Sampling Method                 %
+%                   Illustrating Simulation 7-1                 %
+%       Effect of Sampling Rate and Reconstruction Method      %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
-%                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 7-Section                        %
+%                   By: Dr. Farnaz Ghassemi                    %
+%                     Chapter 7                                %
 %                                                              %
-%   Version.4:             04/03/03---Dr.Ghassemi              % 
-%   Version.3:             04/02/22---Dr.Ghassemi              %                                            %
+%   Version.5:             05/05/22---Revised GPT              %
+%   Version.4:             04/03/03---Dr.Ghassemi              %
+%   Version.3:             04/02/22---Dr.Ghassemi              %
 %   Version.2:             03/09/03---Dr.Ghassemi              %
 %   Version.1:             96/06/30---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%---------------------------------------------------------------
+
 close all;
 clear;
 clc;
-colors=[0,0,0;                       %1-Black
-        0,0,0.75;                    %2-Blue
-        214/255,39/255,40/255;       %3-Red
-        15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;      %5-Purple
-        225/255,124/255,5/255;       %6-Orange
-        56/255,166/255,165/255;      %7-Light Blue
-        204/255,80/255,62/255;       %8-Light Red
-        115/255,175/255,72/255;      %9-Light Green
-        237/255,173/255,8/255;       %10-Light Orange
-        148/255,52/255,110/255;      %11-Light Purple
-        70/255,0,114/255;            %12-Dark Blue
-        0,0.5,0.25                   %13-Green
-        ];
-grayColor = [0.5, 0.5, 0.5];
-marks={'-';'--';':';'-.'};
 
-% Set Text Font
-set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
+%% ------------------------------------------------------------------------
+% Display settings
+cBlue   = [0, 0, 0.75];
+cRed    = [214, 39, 40]/255;
+cGreen  = [15, 133, 84]/255;
+cPurple = [118, 78, 159]/255;
+cGray   = [0.55, 0.55, 0.55];
 
-% Set default properties for titles, labels, and axes
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
-set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
-set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
+fontName = 'Helvetica';
+fontSize = 13;
 
-% Set default properties for title font specifically
-set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
-set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
+%% ------------------------------------------------------------------------
+% Load IPG signal
+dataFile = 'IP.mat';
 
-% Set default properties for all axes
-set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
-set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
-%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
-set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
-set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
-
-% Set default properties for axes
-set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
-set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
-set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
-set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
-
-% Box Style for Axe
-set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-%%---------------------------------------------------------------
-%% Load signal
-load('IP.mat'); 
-fs0 = 125;       % Sampling frequency
-t0 = (0:length(IP)-1)/fs0;
-m=IP;
-m_n=(m-mean(m))/max(abs(m));            % normalized message signal
-M = fftshift(fft(m_n) / length(m_n));   % Fourier transform 
-f = linspace(-fs0/2, fs0/2, length(M));	% frequency vector
-
-fp=(5)*1.2;
-BioSig_Type='IPG';
-% Figure 1: Message Signal
-figure
-subplot(2,1,1)
-plot(t0,m,'Color', colors(2,:),'LineWidth', 2)
-xlabel('Time'), ylabel('Amplitude'), title(['The message signal - (',BioSig_Type,')']), grid on
-subplot(2,1,2)
-plot(f,abs(M),'Color', colors(2,:),'LineWidth', 2) 
-xlabel('Frequency'), ylabel('Magnitude'), xlim([-fp fp]), grid on
-%% Ask user for Sampling rate
-fs = input('Enter the Sampling rate (in samples/sec (Hz), e.g.: 6; The signal band width is 3Hz): ');
-Ts = 1/fs; 
-t = 0:Ts:t0(end); 
-
-%% Sample the signal 
-IP_sampled = interp1(t0, IP, t, 'linear');
-
-sampled_sinc = zeros(size(t0));
-for n = 1:length(IP_sampled)
-    sampled_sinc = sampled_sinc + IP_sampled(n) * sinc(fs*(t0 - t(n)));
-    sampled_Impulse(1+n*fs)=IP_sampled(n);
+if exist(dataFile,'file') ~= 2
+    error(['File "', dataFile, '" was not found. ', ...
+           'Place IP.mat in the current MATLAB folder.']);
 end
-sampled_Impulse = zeros(size(t));
-for i = 1:length(t)
-    sampled_Impulse(i) = IP_sampled(i);
+
+S = load(dataFile);
+
+if ~isfield(S,'IP')
+    error('The MAT-file must contain a variable named IP.');
 end
-sampled_Hold = zeros(size(t0));
-for i = 1:length(t)-1
-    idx = t0 >= t(i) & t0 < t(i+1);
-    sampled_Hold(idx) = IP_sampled(i);
+
+IPraw = S.IP(:);              % Force a column vector
+fs0 = 125;                    % Original recording rate (Hz)
+N = numel(IPraw);
+t0 = (0:N-1).' / fs0;
+
+% Effective bandwidth used in the textbook example
+B = 3.5;                      % Hz
+fsNyquist = 2*B;              % Nyquist rate = 7 Hz
+
+% Sampling rates used in Figs. 7-7(1) to 7-7(3)
+fsList = [2, 7, 15];          % Hz
+
+%% ------------------------------------------------------------------------
+% Spectrum of the recorded IPG and effective bandwidth
+%
+% The recorded physiological signal is not mathematically band-limited.
+% To make the sampling-theorem demonstration precise, a band-limited
+% reference signal is formed with an IDEAL low-pass filter at B = 3.5 Hz.
+% This ideal filter is used only for illustrating the theorem.
+
+% Spectrum used for display and bandwidth-energy calculation
+IPraw0 = IPraw - mean(IPraw);
+XrawShift = fftshift(fft(IPraw0))/N;
+f = ((-floor(N/2)):(ceil(N/2)-1)).' * (fs0/N);
+
+spectralEnergy = abs(XrawShift).^2;
+energyFraction = sum(spectralEnergy(abs(f) <= B)) / sum(spectralEnergy);
+
+% Ideal frequency-domain low-pass filter (DC is preserved)
+fUnshift = (0:N-1).' * (fs0/N);
+fUnshift(fUnshift > fs0/2) = fUnshift(fUnshift > fs0/2) - fs0;
+
+Xfull = fft(IPraw);
+Haa = double(abs(fUnshift) <= B);
+IP = real(ifft(Xfull .* Haa));    % Band-limited reference signal
+
+% Spectrum of the band-limited reference
+IP0 = IP - mean(IP);
+XrefShift = fftshift(fft(IP0))/N;
+
+%% ------------------------------------------------------------------------
+% Figure 7-6: IPG signal used in the simulation
+figure('Color','w','Name','Simulation 7-1: IPG signal');
+
+subplot(2,1,1);
+plot(t0, IPraw, 'Color', cGray, 'LineWidth', 0.9);
+hold on;
+plot(t0, IP, 'Color', cBlue, 'LineWidth', 1.5);
+grid on; box on;
+xlabel('Time (s)', 'FontName',fontName,'FontSize',fontSize);
+ylabel('Amplitude', 'FontName',fontName,'FontSize',fontSize);
+title('Recorded IPG and the 3.5-Hz band-limited reference', ...
+    'FontName',fontName,'FontSize',fontSize+1,'FontWeight','bold');
+legend('Recorded IPG','Band-limited reference','Location','best');
+set(gca,'FontName',fontName,'FontSize',fontSize);
+xlim([t0(1), t0(end)]);
+
+subplot(2,1,2);
+plot(f, abs(XrawShift), 'Color', cGray, 'LineWidth', 0.9);
+hold on;
+plot(f, abs(XrefShift), 'Color', cBlue, 'LineWidth', 1.5);
+xline(B,  '--', 'B_{eff}=3.5 Hz', 'Color', cGray, ...
+    'LabelVerticalAlignment','bottom');
+xline(-B, '--', 'Color', cGray);
+grid on; box on;
+xlabel('Frequency (Hz)', 'FontName',fontName,'FontSize',fontSize);
+ylabel('Magnitude', 'FontName',fontName,'FontSize',fontSize);
+title('Magnitude spectrum', ...
+    'FontName',fontName,'FontSize',fontSize+1,'FontWeight','bold');
+legend('Recorded IPG','Band-limited reference','Location','best');
+set(gca,'FontName',fontName,'FontSize',fontSize);
+xlim([-6, 6]);
+
+fprintf('\nSimulation 7-1\n');
+fprintf('Fraction of non-DC spectral energy within +/- %.1f Hz: %.4f %%\n', ...
+    B, 100*energyFraction);
+fprintf('Nyquist rate corresponding to B = %.1f Hz: %.1f Hz\n\n', ...
+    B, fsNyquist);
+
+%% ------------------------------------------------------------------------
+% Sampling and reconstruction
+%
+% IMPORTANT:
+% 1) Impulse sampling is represented by its sample values using STEM.
+%    A Dirac impulse train is a mathematical model, not a reconstructed
+%    continuous-time waveform.
+%
+% 2) Sinc interpolation is a RECONSTRUCTION method, not a sampling method.
+%    The cardinal sinc form below corresponds to an ideal reconstruction
+%    LPF with cutoff fs/2. For fs >= 2B, it contains the complete signal
+%    spectrum; for fs < 2B, aliasing prevents exact reconstruction.
+%
+% 3) Sample-and-hold is represented by zero-order hold (ZOH).
+
+nRates = numel(fsList);
+NRMSE_Sinc = zeros(nRates,1);
+NRMSE_ZOH  = zeros(nRates,1);
+Status     = cell(nRates,1);
+
+% A small edge region is excluded from the numerical error measure because
+% finite-record sinc reconstruction lacks samples outside the record.
+edgeGuard = 2; % seconds
+valid = (t0 >= t0(1)+edgeGuard) & (t0 <= t0(end)-edgeGuard);
+if ~any(valid)
+    valid = true(size(t0));
 end
-sampled_Hold(t0 >= t(end)) = IP_sampled(end);
 
+refRMS = sqrt(mean((IP(valid) - mean(IP(valid))).^2));
 
-%% Plotting
-figure;
-tlim = [0 t0(end)];
+% Common y-limits make visual comparison between panels easier.
+yMin = min([IP; 0]);
+yMax = max([IP; 0]);
+yPad = 0.05 * max(yMax-yMin, eps);
+commonYLim = [yMin-yPad, yMax+yPad];
 
-subplot(4,1,1);
-plot(t0, IP, 'Color', colors(2,:), 'LineWidth', 2);
-title('Original Signal');
-xlabel('Time (s)'); ylabel('Amplitude'); grid on;
-xlim(tlim);
+for ii = 1:nRates
 
-subplot(4,1,2);
-plot(t0, sampled_sinc, 'Color', colors(3,:), 'LineWidth', 2);
-title(['Sinc Based Sampled Signal, f_s= ',num2str(fs),' Hz']);
-xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim); hold on;
-plot(t0, IP, 'Color', colors(2,:), 'LineWidth', 1);
-legend ('Sampled Signal','Original Signal');
+    fs = fsList(ii);
+    Ts = 1/fs;
 
-subplot(4,1,3);
-plot(t, sampled_Impulse, 'Color', colors(5,:), 'LineWidth', 2);
-title(['Ideal Impulse Based Sampled Signal, f_s= ',num2str(fs),' Hz']);
-xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);hold on;
-plot(t0, IP, 'Color', colors(2,:), 'LineWidth', 1);
-legend ('Sampled Signal','Original Signal');
+    % Sampling instants. The last instant never exceeds t0(end).
+    ts = (0:Ts:t0(end)).';
 
-subplot(4,1,4);
-plot(t0, sampled_Hold, 'Color', colors(4,:), 'LineWidth', 2);
-title(['Sample & Hold Based Sampled Signal, f_s= ',num2str(fs),' Hz']);
-xlabel('Time (s)'); ylabel('Amplitude'); grid on; xlim(tlim);hold on;
-plot(t0, IP, 'Color', colors(2,:), 'LineWidth', 1);
-legend ('Sampled Signal','Original Signal');
+    % The 125-Hz band-limited reference is used as a high-rate approximation
+    % of the continuous-time signal. Linear interpolation estimates x(kTs).
+    xs = interp1(t0, IP, ts, 'linear');
 
+    %% Ideal sinc reconstruction
+    % MATLAB sinc(x) = sin(pi*x)/(pi*x):
+    % x_hat(t) = sum_k x(kTs) sinc(fs*(t-kTs))
+    xSinc = zeros(size(t0));
+    for k = 1:numel(ts)
+        xSinc = xSinc + xs(k) .* sinc(fs*(t0-ts(k)));
+    end
 
+    %% Sample-and-hold (zero-order hold)
+    xZOH = interp1(ts, xs, t0, 'previous', 'extrap');
+
+    %% Quantitative reconstruction error
+    if refRMS > 0
+        NRMSE_Sinc(ii) = sqrt(mean((IP(valid)-xSinc(valid)).^2)) / refRMS;
+        NRMSE_ZOH(ii)  = sqrt(mean((IP(valid)-xZOH(valid)).^2))  / refRMS;
+    else
+        NRMSE_Sinc(ii) = NaN;
+        NRMSE_ZOH(ii)  = NaN;
+    end
+
+    %% Nyquist status
+    tol = 100*eps(max(fs,fsNyquist));
+    if fs < fsNyquist-tol
+        Status{ii} = 'Below Nyquist';
+    elseif abs(fs-fsNyquist) <= tol
+        Status{ii} = 'Nyquist limit';
+    else
+        Status{ii} = 'Above Nyquist';
+    end
+
+    %% Plot results for this sampling rate
+    figure('Color','w', ...
+        'Name',sprintf('Simulation 7-1: f_s = %g Hz',fs));
+
+    % 1) Band-limited reference signal
+    subplot(4,1,1);
+    plot(t0, IP, 'Color', cBlue, 'LineWidth', 1.35);
+    grid on; box on;
+    xlim([t0(1), t0(end)]); ylim(commonYLim);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title(sprintf('Reference IPG signal   (f_s = %g Hz: %s)',fs,Status{ii}));
+    set(gca,'FontName',fontName,'FontSize',fontSize);
+
+    % 2) Ideal sinc reconstruction
+    subplot(4,1,2);
+    plot(t0, xSinc, 'Color', cRed, 'LineWidth', 1.5);
+    hold on;
+    plot(t0, IP, 'Color', cBlue, 'LineWidth', 0.9);
+    grid on; box on;
+    xlim([t0(1), t0(end)]); ylim(commonYLim);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title(sprintf('Ideal sinc reconstruction   NRMSE = %.4f',NRMSE_Sinc(ii)));
+    legend('Sinc reconstruction','Reference signal','Location','best');
+    set(gca,'FontName',fontName,'FontSize',fontSize);
+
+    % 3) Ideal impulse sampling: display the sample values with stems
+    subplot(4,1,3);
+    plot(t0, IP, 'Color', cGray, 'LineWidth', 0.9);
+    hold on;
+    stem(ts, xs, 'Color', cPurple, 'LineWidth', 1.15, ...
+        'Marker','o','MarkerSize',3,'MarkerFaceColor',cPurple);
+    grid on; box on;
+    xlim([t0(1), t0(end)]); ylim(commonYLim);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title('Ideal impulse sampling (displayed as sample values)');
+    legend('Reference signal','Samples x(kT_s)','Location','best');
+    set(gca,'FontName',fontName,'FontSize',fontSize);
+
+    % 4) Sample-and-hold / zero-order hold
+    subplot(4,1,4);
+    stairs(t0, xZOH, 'Color', cGreen, 'LineWidth', 1.45);
+    hold on;
+    plot(t0, IP, 'Color', cBlue, 'LineWidth', 0.9);
+    grid on; box on;
+    xlim([t0(1), t0(end)]); ylim(commonYLim);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title(sprintf('Sample-and-hold (ZOH)   NRMSE = %.4f',NRMSE_ZOH(ii)));
+    legend('ZOH output','Reference signal','Location','best');
+    set(gca,'FontName',fontName,'FontSize',fontSize);
+end
+
+%% ------------------------------------------------------------------------
+% Summary table
+SamplingRate_Hz = fsList(:);
+NyquistStatus   = Status;
+Results = table(SamplingRate_Hz, NyquistStatus, NRMSE_Sinc, NRMSE_ZOH);
+
+fprintf('\nReconstruction-error summary\n');
+disp(Results);
+
+fprintf(['NRMSE is evaluated after excluding %.1f s from each record edge ', ...
+         'to reduce finite-record sinc boundary effects.\n'], edgeGuard);
