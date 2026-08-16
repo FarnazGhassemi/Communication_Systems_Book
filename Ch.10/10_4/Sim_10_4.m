@@ -10,299 +10,227 @@
 %   Version.1:             04/03/03---Dr.Ghassemi              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%---------------------------------------------------------------
-classdef Sim_10_4 < matlab.apps.AppBase
-
-    % Properties that correspond to app components
-    properties (Access = public)
-        UIFigure               matlab.ui.Figure
-        DisplayAudioButton     matlab.ui.control.Button
-        DisplayAudioDropDown   matlab.ui.control.DropDown
-        TelegraphLabel         matlab.ui.control.Label
-        MorseCodeLabel         matlab.ui.control.Label
-        TextLabel              matlab.ui.control.Label
-        EditField_Telegraph    matlab.ui.control.EditField
-        EditField_3Label       matlab.ui.control.Label
-        speedSlider            matlab.ui.control.Slider
-        speedSliderLabel       matlab.ui.control.Label
-        waveformDropDown       matlab.ui.control.DropDown
-        waveformDropDownLabel  matlab.ui.control.Label
-        ConvertButton          matlab.ui.control.Button
-        convertDropDown        matlab.ui.control.DropDown
-        PlayAudioButton        matlab.ui.control.Button
-        EditField_2            matlab.ui.control.EditField
-        EditField              matlab.ui.control.EditField
-        UIAxes                 matlab.ui.control.UIAxes
+close all;
+clear;
+clc;
+clc
+clear all
+close all
+m=input('Mannual=0/Auto=1  ???');
+%---------Input data-------------------------
+if (m==0)
+    I=input('Number of Symbols?');
+    %p=zeros(1:I);
+    symbols=[1:I];
+    for i=1:(I-1)
+        p(i)=input(['p(',num2str(i),')=?']);
     end
-
-    % Callbacks that handle component events
-    methods (Access = private)
-
-        % Button pushed function: PlayAudioButton
-        function PlayAudioButtonPushed(app, event)
-            mode = app.DisplayAudioDropDown.Value;
-            switch mode
-                case "Display Morse"
-                    [MorseSound, ~] = AudioMorse(app.EditField_2.Value, app.waveformDropDown.Value);
-                    Audio = audioplayer(MorseSound, round(app.speedSlider.Value));
-                case "Display Telegraph"
-                    [TelegraphSound, ~] = AudioTelegraph(app.EditField_Telegraph.Value, app.waveformDropDown.Value);
-                    Audio = audioplayer(TelegraphSound, round(app.speedSlider.Value));
-            end
-            pause(0.25);
-            play(Audio)
-            while isplaying(Audio)
-                pause(0.00001);
-            end
-        end
-
-        % Button pushed function: ConvertButton
-        function ConvertButtonPushed(app, event)
-            mode = app.convertDropDown.Value;
-        
-            switch mode
-                case "Encode Text"
-                    inputText = upper(app.EditField.Value); % String input
-                    morseResult = encode(inputText);        % Convert to Morse
-                    codes = strings(1, length(inputText));  % Convert to Telegraph
-        
-                    for i = 1:length(inputText)
-                        codes(i) = "0" + telegraph_code(inputText(i)) + "11";
-                    end
-                    telegraphResult = join(codes, "'");  % Start bit + data + two stop bits
-        
-                    app.EditField_2.Value = morseResult;
-                    app.EditField_Telegraph.Value = telegraphResult;
-        
-                case "Decode Morse"
-                    morseInput = app.EditField_2.Value;      % Morse input
-                    decodedText = decode(morseInput);        % Morse → String
-                    codes = strings(1, length(decodedText));  % Convert to Telegraph
-        
-                    for i = 1:length(decodedText)
-                        codes(i) = "0" + telegraph_code(decodedText(i)) + "11";
-                    end
-                    telegraphResult = join(codes, "'");  % Start bit + data + two stop bits
-        
-                    app.EditField.Value = decodedText;
-                    app.EditField_Telegraph.Value = telegraphResult;
-        
-                case "Decode Telegraph"
-                    telegraphInput = app.EditField_Telegraph.Value;  % Telegraph input
-                    decodedText = decode_telegraph(telegraphInput);  % Telegraph → String
-                    morseResult = encode(decodedText);               % String → Morse
-        
-                    app.EditField.Value = decodedText;
-                    app.EditField_2.Value = morseResult;
-            end
-        end
-
-        % Value changed function: EditField_Telegraph, convertDropDown
-        function EditField_TelegraphValueChanged(app, event)
-            value = app.EditField_Telegraph.Value;
-        end
-
-        % Value changed function: DisplayAudioDropDown
-        function DisplayAudioDropDownValueChanged(app, event)
-            value = app.DisplayAudioDropDown.Value;
-        end
-
-        % Button pushed function: DisplayAudioButton
-        function DisplayAudioButtonPushed(app, event)
-            mode = app.DisplayAudioDropDown.Value;
-            switch mode
-                case "Display Morse"
-                    [Sound, ~] = AudioMorse(app.EditField_2.Value, app.waveformDropDown.Value);
-                case "Display Telegraph"
-                    [Sound, ~] = AudioTelegraph(app.EditField_Telegraph.Value, app.waveformDropDown.Value);
-            end
-            
-            plot(Sound, 'Parent', app.UIAxes);
-            ylim(app.UIAxes, [-inf inf]);
-            xlim(app.UIAxes, [0 length(Sound)]);
-        end
+    p(I)=1-sum(p);
+    if or((p(I)<0),(p(I)>1))
+        disp('Error in probability!!!')
+        return;
     end
+else
+    disp('Number of Auto-Coding? (1 to 4)')
+    disp('1: Full English Alphabet')
+    disp('2: Full Numbers')
+    disp('3: A T SH K L M v')
+    disp('4: b i o e n g r')
+    k=input('?');
+    switch k
+        case 1
+            symbols = {'a' , 'b' , 'c' , 'd' , 'e' , 'f' , 'g' , 'h' , 'i' , 'j' , 'k' , 'l' , 'm' , 'n' , 'o' , 'p' , 'q' , 'r' , 's' , 't' , 'u' , 'v' , 'w' , 'x' , 'y' , 'z'};
+            p = [36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 , 22 , 21 , 20 , 19 , 17 , 16 , 14 , 13 , 12 , 11 , 8 , 4 , 2 , 1 ]/537; % Probability distribution
+        case 2
+            symbols = {' ','0','1','2','3','4','5','6','7','8','9','.'};
+            p = [36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 ]/sum([36 , 35 , 34 , 32 , 31 , 30 , 29 , 28 , 27 , 26 , 25 , 24 ]); % Probability distribution
+        case 3
+            symbols ={'A','T','SH','K','L','M','v'};
+            %p = [64,4,8,1,2,16,32]/127;
+            p = [64,4,8,1,2,16,32]/127;
+        case 4
+            symbols = {'b' 'i' 'o' 'e' 'n' 'g' 'r'}; % Distinct symbols that data source can produce
 
-    % Component initialization
-    methods (Access = private)
-
-        % Create UIFigure and components
-        function createComponents(app)
-
-            % Create UIFigure and hide until all components are created
-            app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Color = [0.2824 0.4667 0.6];
-            app.UIFigure.Position = [100 100 696 480];
-            app.UIFigure.Name = 'MATLAB App';
-            app.UIFigure.Scrollable = 'on';
-
-            % Create UIAxes
-            app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, 'Audio Lines')
-            zlabel(app.UIAxes, 'Z')
-            app.UIAxes.FontName = 'Arial';
-            app.UIAxes.FontAngle = 'italic';
-            app.UIAxes.FontUnits = 'points';
-            app.UIAxes.TitleFontSizeMultiplier = 1.2;
-            app.UIAxes.Box = 'on';
-            app.UIAxes.Position = [91 36 299 195];
-
-            % Create EditField
-            app.EditField = uieditfield(app.UIFigure, 'text');
-            app.EditField.FontSize = 18;
-            app.EditField.Tooltip = {'Type text using alphabets and space between words.'};
-            app.EditField.Position = [37 387 452 47];
-            app.EditField.Value = 'SOS';
-
-            % Create EditField_2
-            app.EditField_2 = uieditfield(app.UIFigure, 'text');
-            app.EditField_2.FontSize = 18;
-            app.EditField_2.Tooltip = {'Type Morse code using ''.'', ''-'' or ''_'', using apastrophe '' between letters and ''/'' between words.'};
-            app.EditField_2.Position = [37 319 452 42];
-            app.EditField_2.Value = '...''---''...';
-
-            % Create PlayAudioButton
-            app.PlayAudioButton = uibutton(app.UIFigure, 'push');
-            app.PlayAudioButton.ButtonPushedFcn = createCallbackFcn(app, @PlayAudioButtonPushed, true);
-            app.PlayAudioButton.FontName = 'Arial';
-            app.PlayAudioButton.FontWeight = 'bold';
-            app.PlayAudioButton.FontAngle = 'italic';
-            app.PlayAudioButton.Position = [529 251 84 26];
-            app.PlayAudioButton.Text = 'Play Audio';
-
-            % Create convertDropDown
-            app.convertDropDown = uidropdown(app.UIFigure);
-            app.convertDropDown.Items = {'Encode Text', 'Decode Morse', 'Decode Telegraph'};
-            app.convertDropDown.ValueChangedFcn = createCallbackFcn(app, @EditField_TelegraphValueChanged, true);
-            app.convertDropDown.FontWeight = 'bold';
-            app.convertDropDown.FontAngle = 'italic';
-            app.convertDropDown.Position = [508 409 128 25];
-            app.convertDropDown.Value = 'Encode Text';
-
-            % Create ConvertButton
-            app.ConvertButton = uibutton(app.UIFigure, 'push');
-            app.ConvertButton.ButtonPushedFcn = createCallbackFcn(app, @ConvertButtonPushed, true);
-            app.ConvertButton.FontName = 'Arial';
-            app.ConvertButton.FontWeight = 'bold';
-            app.ConvertButton.FontAngle = 'italic';
-            app.ConvertButton.Position = [537 371 67 26];
-            app.ConvertButton.Text = 'Convert';
-
-            % Create waveformDropDownLabel
-            app.waveformDropDownLabel = uilabel(app.UIFigure);
-            app.waveformDropDownLabel.HorizontalAlignment = 'right';
-            app.waveformDropDownLabel.FontSize = 14;
-            app.waveformDropDownLabel.FontWeight = 'bold';
-            app.waveformDropDownLabel.FontAngle = 'italic';
-            app.waveformDropDownLabel.Position = [483 209 71 22];
-            app.waveformDropDownLabel.Text = 'waveform';
-
-            % Create waveformDropDown
-            app.waveformDropDown = uidropdown(app.UIFigure);
-            app.waveformDropDown.Items = {'sin', 'sawtooth', 'square'};
-            app.waveformDropDown.FontWeight = 'bold';
-            app.waveformDropDown.FontAngle = 'italic';
-            app.waveformDropDown.Position = [482 186 83 22];
-            app.waveformDropDown.Value = 'sin';
-
-            % Create speedSliderLabel
-            app.speedSliderLabel = uilabel(app.UIFigure);
-            app.speedSliderLabel.HorizontalAlignment = 'right';
-            app.speedSliderLabel.FontWeight = 'bold';
-            app.speedSliderLabel.FontAngle = 'italic';
-            app.speedSliderLabel.Position = [445 61 39 22];
-            app.speedSliderLabel.Text = 'speed';
-
-            % Create speedSlider
-            app.speedSlider = uislider(app.UIFigure);
-            app.speedSlider.Limits = [5000 30000];
-            app.speedSlider.MajorTicks = [10000 20000 30000];
-            app.speedSlider.Orientation = 'vertical';
-            app.speedSlider.FontWeight = 'bold';
-            app.speedSlider.FontAngle = 'italic';
-            app.speedSlider.Position = [505 70 3 104];
-            app.speedSlider.Value = 10000;
-
-            % Create EditField_3Label
-            app.EditField_3Label = uilabel(app.UIFigure);
-            app.EditField_3Label.HorizontalAlignment = 'right';
-            app.EditField_3Label.FontSize = 18;
-            app.EditField_3Label.Position = [37 260 80 22];
-            app.EditField_3Label.Text = 'Edit Field';
-
-            % Create EditField_Telegraph
-            app.EditField_Telegraph = uieditfield(app.UIFigure, 'text');
-            app.EditField_Telegraph.ValueChangedFcn = createCallbackFcn(app, @EditField_TelegraphValueChanged, true);
-            app.EditField_Telegraph.FontSize = 18;
-            app.EditField_Telegraph.Tooltip = {'Type Telegraph code according to ITA2 protocl for Baudot code (Supports Alphabets and space (00100)) such that each character consists of 5 data bits, preceeded by one start bit (0) and succeeded by two stop bits (11). seperate each 8 bit code using apasttrophe '' .'};
-            app.EditField_Telegraph.Position = [38 251 451 40];
-            app.EditField_Telegraph.Value = '00010111''01100011''00010111';
-
-            % Create TextLabel
-            app.TextLabel = uilabel(app.UIFigure);
-            app.TextLabel.FontSize = 16;
-            app.TextLabel.FontWeight = 'bold';
-            app.TextLabel.Position = [38 433 79 31];
-            app.TextLabel.Text = 'Text:';
-
-            % Create MorseCodeLabel
-            app.MorseCodeLabel = uilabel(app.UIFigure);
-            app.MorseCodeLabel.FontSize = 16;
-            app.MorseCodeLabel.FontWeight = 'bold';
-            app.MorseCodeLabel.Position = [37 359 102 28];
-            app.MorseCodeLabel.Text = 'Morse Code:';
-
-            % Create TelegraphLabel
-            app.TelegraphLabel = uilabel(app.UIFigure);
-            app.TelegraphLabel.FontSize = 16;
-            app.TelegraphLabel.FontWeight = 'bold';
-            app.TelegraphLabel.Position = [37 290 133 29];
-            app.TelegraphLabel.Text = 'Telegraph:';
-
-            % Create DisplayAudioDropDown
-            app.DisplayAudioDropDown = uidropdown(app.UIFigure);
-            app.DisplayAudioDropDown.Items = {'Display Morse', 'Display Telegraph'};
-            app.DisplayAudioDropDown.ValueChangedFcn = createCallbackFcn(app, @DisplayAudioDropDownValueChanged, true);
-            app.DisplayAudioDropDown.FontWeight = 'bold';
-            app.DisplayAudioDropDown.FontAngle = 'italic';
-            app.DisplayAudioDropDown.Position = [507 328 128 25];
-            app.DisplayAudioDropDown.Value = 'Display Morse';
-
-            % Create DisplayAudioButton
-            app.DisplayAudioButton = uibutton(app.UIFigure, 'push');
-            app.DisplayAudioButton.ButtonPushedFcn = createCallbackFcn(app, @DisplayAudioButtonPushed, true);
-            app.DisplayAudioButton.FontName = 'Arial';
-            app.DisplayAudioButton.FontWeight = 'bold';
-            app.DisplayAudioButton.FontAngle = 'italic';
-            app.DisplayAudioButton.Position = [524 290 95 26];
-            app.DisplayAudioButton.Text = 'Display Audio';
-
-            % Show the figure after all components are created
-            app.UIFigure.Visible = 'on';
-        end
+            p = [100,6,12,1,3,25,50]/197;
+            %     symbols = =[1:6];
+    end  
+    
+    I=length(symbols);
+    disp(['Number of Alphabets: ',num2str(I)])
+    disp(['Sum of Probabilities: ',num2str(sum(p))])
+    disp(['Probabilities: ',num2str(p)])
+end
+%---------------------------------------------
+%---------Coding data-------------------------
+[dict,avglen] = huffmandict(symbols,p); % Create dictionary.
+disp('The Dictionary is:')
+disp(['      Symbol   Code    Probability'])
+for i=1:I
+     disp([dict(i,1),num2str(cell2mat(dict(i,2))),num2str(p(i))])
+end
+disp('The Average Length is:')
+disp(avglen)
+disp('###################################################################')
+%disp('-------------------------------------------------------------------')
+%---------------------------------------------
+%---------Output data-------------------------
+i=1;
+if (m==0)
+    actualsig =input('symbols in numbers for coding? (ex. [1 2 1 3]/exit: -100 )');
+    if (actualsig==-100)
+        return;
     end
+    while (actualsig~=-100)
+        comp = huffmanenco(actualsig,dict)
+        actualsig =input('symbols in numbers for coding? (ex. [1 2 1 3]/exit: -100 )');
+        if (actualsig==-100)
+           return;
+        end
+    end   
+else   
+    switch k
+        case 1
+            actualsig={'h' 'a' 'p' 'p' 'y'};
+            comp = huffmanenco(actualsig,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+%     actualsig={'a' 'p' 'p' 'l' 'e'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+%     actualsig={'h' 'u' 'r' 'a' 'y'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+%     actualsig={'s' 'm' 'a' 'r' 't'};
+%     comp = huffmanenco(actualsig,dict) % Encode the data.
+        case 2
+            symbols = {'1','3','5','9'};
+            comp = huffmanenco(symbols,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+             % load('MATLAB.mat')
+             % actualsig =1;
+             % while (i<= length(A))
+             %    actualsig =num2str(A(i,1));
+             %    comp = num2str(huffmanenco(actualsig,dict));
+             %    T(i,1)={comp};
+             %    actualsig =num2str(A(i,2));
+             %    comp= num2str(huffmanenco(actualsig,dict));
+             %    T(i,2)={comp};
+             %    i=i+1;
+             % end
+             % disp(['Encoded Data:'])
+             % disp(T)
+        case 3
+            actualsig={'T' 'A' 'L' 'A' 'SH'};
+            comp = huffmanenco(actualsig,dict); % Encode the data.
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+        case 4
+            actualsig={'b' 'i' 'o' 'e' 'n' 'g' 'i' 'n' 'e' 'e' 'r' 'i' 'n' 'g'};
+            comp = huffmanenco(actualsig,dict);
+            disp(['Encoded Data:'])
+            disp(num2str(comp))
+            %     actualsig = randsrc(100,1,[symbols; p]); % Create data using p.
+%     actualsig=[11110001110100100100001101011000001001];
 
-    % App creation and deletion
-    methods (Access = public)
+    end     
+ 
+%      actualsig =num2str(input('symbol? '))
+%      comp = huffmanenco(actualsig,dict) 
+end
 
-        % Construct app
-        function app = Sim_10_4
-
-            % Create UIFigure and components
-            createComponents(app)
-
-            % Register the app with App Designer
-            registerApp(app, app.UIFigure)
-
-            if nargout == 0
-                clear app
+%---------Decode user data-------------------------
+% actualsig=[];
+switch k
+    case 1
+        actualsig =input('Symbols for Coding?(ex.: [''t'' ''e'' ''l'']/exit: -100)');
+        if (actualsig==-100)
+           return;
+        end
+         while (actualsig ~= -100)
+             comp = huffmanenco(actualsig,dict);
+             dsig = huffmandeco(comp,dict); % Decode the Huffman code
+             %     str2num((char(dsig))')
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',actualsig ])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp([char (dsig)])
+            actualsig =num2str(input('Symbols for Coding?(ex.: [''t'' ''e'' ''l'']/exit: -100)'));
+            if (str2num(actualsig)==-100)
+               return;
+            end
+         end
+    case 2
+        actualsig =input('Symbols for Coding?(ex.: 9311018/exit: -100)');
+        if (actualsig==-100)
+           return;
+        end
+        while (actualsig ~= -100)
+            comp = huffmanenco(num2str(actualsig),dict) ;
+            %  x=[];
+            % for i=1:length(A) 
+            %     if(strmatch(str2num(char(T(i,1)))',comp))
+            %         x=i;
+            %     end
+            % end
+            % dsig = huffmandeco(str2num(char(T(x,2)))',dict); % Decode the Huffman code.
+        %     str2num((char(dsig))')
+            % disp([num2str(actualsig) ,'     ',(char(dsig))'])
+            dsig = huffmandeco(comp,dict); % Decode the Huffman code.
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',num2str(actualsig)])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp(['     ',cell2mat(dsig)])
+            actualsig=[];
+            actualsig =input('Symbols for Coding?(ex.: 9311018 /exit: -100)');
+            if (actualsig == -100)
+               return;
             end
         end
-
-        % Code that executes before app deletion
-        function delete(app)
-
-            % Delete UIFigure when app is deleted
-            delete(app.UIFigure)
+    case 3
+        actualsig =input('Symbols for Coding?(ex.: [ ''A''  ''T'' ''S'' ''K'' ''L'' ''M'' ''v'']/exit: -100)');
+        if (actualsig==-100)
+           return;
         end
-    end
+        while (actualsig ~= -100)
+            comp = huffmanenco(actualsig,dict) % Encode the data.
+            dsig = huffmandeco(comp,dict) % Decode the Huffman code.
+            disp(dict)
+            disp(['Message:'])
+            disp(['     ',num2str(actualsig)])
+            disp(['Encoded Data:'])
+            disp(['     ',num2str(comp)])
+            disp(['Dencoded Data:'])
+            disp(['     ',cell2mat(dsig)])
+            actualsig=[];
+            actualsig =input('Symbols for Coding?(ex.: [ ''A''  ''T'' ''S'' ''K'' ''L'' ''M'' ''v'']/exit: -100)');
+            if (actualsig == -100)
+               return;
+            end
+        end
+        case 4
+            actualsig =input('Symbols for Coding?(ex.: [ ''b'' ''i'' ''o'' ''e'' ''n'' ''g'' ''r'']/exit: -100)');
+            if (actualsig==-100)
+               return;
+            end
+            while (actualsig ~= -100)
+                comp = huffmanenco(actualsig,dict); % Encode the data.
+                dsig = huffmandeco(comp,dict); % Decode the Huffman code.
+                disp(dict)
+                disp(['Message:'])
+                disp(['     ',num2str(actualsig)])
+                disp(['Encoded Data:'])
+                disp(['     ',num2str(comp)])
+                disp(['Dencoded Data:'])
+                disp(['     ',cell2mat(dsig)])
+                actualsig=[];
+                actualsig =input('Symbols for Coding?(ex.: [ ''b'' ''i'' ''o'' ''e'' ''n'' ''g'' ''r'']/exit: -100)');
+                if (actualsig == -100)
+                   return;
+                end
+            end
 end

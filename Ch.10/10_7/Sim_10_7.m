@@ -1,104 +1,79 @@
-% Generate alpha values
-a = linspace(0, 1, 1000);
-
-% Compute entropy function
-H = -(a.*log2(a)+(1-a).*log2(1-a));
-
-% Handle NaNs caused by log2(0)
-H(isnan(H)) = 0;
-
-%% new figure
-% Plot
-figure;
-hold on;
-
-%% axis
-ylim([-0.1, 1.2]);
-xlim([-0.1, 1.2]); 
-
-% Define the gray color for the axes and arrowheads
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   Illustrating Simulation 10-7:               %
+%     Types of Adverse Effects of Channel On Message Signal    %
+%                                                              %
+%        Book : Analog & Digital Communication Systems         %
+%                   By: Dr.Farnaz Ghassemi                     %
+%                     Chapter 1-Section                        %
+%                                                              %
+%                                                              %
+%   Version.2:             03/09/03---Dr.Ghassemi              %
+%   Version.1:             96/06/30---Dr.Ghassemi              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%---------------------------------------------------------------
+close all;
+clear all;
+clc;
+colors=[0,0,0;                       %1-Black
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;      %5-Purple
+        225/255,124/255,5/255;       %6-Orange
+        56/255,166/255,165/255;      %7-Light Blue
+        204/255,80/255,62/255;       %8-Light Red
+        115/255,175/255,72/255;      %9-Light Green
+        237/255,173/255,8/255;       %10-Light Orange
+        148/255,52/255,110/255;      %11-Light Purple
+        70/255,0,114/255;            %12-Dark Blue
+        0,0.5,0.25                   %13-Green
+        ];
 grayColor = [0.5, 0.5, 0.5];
+marks={'-';'--';':';'-.'};
 
-% Plot the vertical line (Y Axis)
-x_shaft = [0, 0]; % x-coordinates
-y_shaft = [0, 1.1]; % y-coordinates
-plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
+% Set Text Font
+set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
-% Plot the triangular arrowhead for the vertical axis
-arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
-arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
-p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
-p.EdgeColor = grayColor;
+% Set default properties for titles, labels, and axes
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Default font for axes
+set(groot, 'DefaultAxesFontSize', 12); % Default font size for axes
+set(groot, 'DefaultAxesTitleFontWeight', 'bold'); % Default title weight (optional)
 
-% Plot the horizontal line (X Axis)
-x_shaft1 = [0, 1.1]; % x-coordinates
-y_shaft1 = [0, 0]; % y-coordinates
-plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
+% Set default properties for title font specifically
+set(groot, 'DefaultAxesTitleFontSizeMultiplier', 1.2); % Adjust title font size relative to axes font size
+set(groot, 'DefaultTextFontName', 'Helvetica'); % Default font for text objects
 
-% Plot the triangular arrowhead for the horizontal axis
-arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
-arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
-p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
-p1.EdgeColor = grayColor;
+% Set default properties for all axes
+set(groot, 'DefaultAxesFontSize', 14); % Set font size for all axes' tick labels
+set(groot, 'DefaultAxesFontName', 'Helvetica'); % Set font for all axes' tick labels
+%set(groot, 'DefaultAxesFontWeight', 'bold'); % Set font weight for all axes' tick labels
+set(groot, 'DefaultAxesXColor', 'black'); % Set X-axis color
+set(groot, 'DefaultAxesYColor', 'black'); % Set Y-axis color
 
-%% plot
-plot(a, H, 'b', 'LineWidth', 2.25);       % Entropy function
+% Set default properties for axes
+set(groot, 'DefaultAxesGridLineStyle', '-'); % Default grid line style
+set(groot, 'DefaultAxesGridColor', [0 0 0]); % Default grid color (black)
+set(groot, 'DefaultAxesGridAlpha', 0.5); % Default grid opacity (fully opaque)
+set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid lines too)
 
-% Add vertical line at alpha = 0.5 from y = 0 to y = 1
-line([0.5 0.5], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+% Box Style for Axe
+set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
+%%---------------------------------------------------------------
+% Channel Capacity Simulation
+% This script visualizes Shannon's channel capacity formula.
 
-% Add horizontal line at H = 1 from alpha = 0 to 0.5
-line([0 0.5], [1 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+% Step 1: Define Parameters
+B = 10; % Bandwidth (Hz)
+SNR_dB = 0:1:30; % Signal-to-noise ratio (in dB)
+SNR = 10.^(SNR_dB/10); % Convert SNR to linear scale
 
-% Labels and title
-xlabel('Symbol probability, \alpha');
-ylabel('H(\alpha)');
-title('Entropy function H(\alpha)');
+% Step 2: Calculate Channel Capacity
+C = B * log2(1 + SNR); % Shannon's formula
 
-% Legend and grid
-grid on;
-
-%% new figure
-% Plot
+% Step 3: Visualization
 figure;
-hold on;
-
-%% Axis
-ylim([-0.1, 1.2]);
-xlim([-0.1, 1.2]); 
-
-% Define the gray color for the axes and arrowheads
-grayColor = [0.5, 0.5, 0.5];
-
-% Plot the vertical line (Y Axis)
-x_shaft = [0, 0]; % x-coordinates
-y_shaft = [0, 1.1]; % y-coordinates
-plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
-
-% Plot the triangular arrowhead for the vertical axis
-arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
-arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
-p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
-p.EdgeColor = grayColor;
-
-% Plot the horizontal line (X Axis)
-x_shaft1 = [0, 1.1]; % x-coordinates
-y_shaft1 = [0, 0]; % y-coordinates
-plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
-
-% Plot the triangular arrowhead for the horizontal axis
-arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
-arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
-p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
-p1.EdgeColor = grayColor;
-
-%% plot
-plot(a, 1 - H, 'b', 'LineWidth', 2.25);       % Channel capacity
-
-% Labels and title
-xlabel('Transition probability \alpha');
-ylabel('Channel capacity C');
-title('Channel capacity C');
-
-% Legend and grid
+plot(SNR_dB, C, 'LineWidth', 2);
+title('Channel Capacity vs SNR');
+xlabel('SNR (dB)');
+ylabel('Channel Capacity (bits per second)');
 grid on;

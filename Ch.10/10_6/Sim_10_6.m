@@ -1,62 +1,104 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Shannon-Fano Encoding and Decoding for Text Compression    %
-%                                                              %
-%        Book : Analog & Digital Communication Systems         %
-%                   By: Dr.Farnaz Ghassemi                     %
-%                          Chapter 8                           %
-%                                                              %
-%                                                              %
-%   Version.1:             03/03/30                            %
-%   The first version Contributed voluntarily by               %
-%   Khaleghi.                                                  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%------------------------- Discription ------------------------
-%%  This script implements Shannon-Fano encoding, a data compression 
-%    technique that assigns variable-length binary codes to characters 
-%    based on their frequency. It encodes a given input text, saves 
-%    the encoded string to a file, and decodes it back to the original 
-%    text using the generated codebook.
-%
-%   Functions :
-%       shanon_fano_encoding : Generates a codebook (character-to-binary mapping) 
-%        and the encoded string (coded_str).
-%       decode_shanon_fano : Decodes the encoded string (coded_str) back 
-%        to the original text using the generated codebook.
+% Generate alpha values
+a = linspace(0, 1, 1000);
 
-%   Inputs:
-%       Reads a text file (input_text.txt) from the current directory.
-%   Outputs:
-%       Prints the character codes and the encoded string.
-%       Writes the encoded string to a new file (encoded_text.txt).
-%       Prints the decoded string to confirm it matches the original input.
-%%---------------------------------------------------------------
-%%
+% Compute entropy function
+H = -(a.*log2(a)+(1-a).*log2(1-a));
 
-% Read input string from a text file in the current directory
-file_name = 'input_text.txt';
-input_str = fileread(file_name);
+% Handle NaNs caused by log2(0)
+H(isnan(H)) = 0;
 
-% Encode the input string using Shanon-Fano encoding
-[codebook, coded_str] = shanon_fano_encoding(input_str);
+%% new figure
+% Plot
+figure;
+hold on;
 
-% Display the coded symbols
-disp('Character codes:');
-keys = codebook.keys;
-for i = 1:length(keys)
-    fprintf('%c: %s\n', keys{i}, codebook(keys{i}));
-end
+%% axis
+ylim([-0.1, 1.2]);
+xlim([-0.1, 1.2]); 
 
-% Display the coded string
-disp(['Coded string: ' coded_str]);
+% Define the gray color for the axes and arrowheads
+grayColor = [0.5, 0.5, 0.5];
 
-% Write the encoded string to a text file
-encoded_file_name = 'encoded_text.txt';
-fid = fopen(encoded_file_name, 'w');
-fprintf(fid, '%s', coded_str);
-fclose(fid);
+% Plot the vertical line (Y Axis)
+x_shaft = [0, 0]; % x-coordinates
+y_shaft = [0, 1.1]; % y-coordinates
+plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
 
-% Decode the coded string using the generated codebook
-decoded_str = decode_shanon_fano(coded_str, codebook);
+% Plot the triangular arrowhead for the vertical axis
+arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
+arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
+p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
+p.EdgeColor = grayColor;
 
-% Display the decoded string
-disp(['Decoded string: ' decoded_str]);
+% Plot the horizontal line (X Axis)
+x_shaft1 = [0, 1.1]; % x-coordinates
+y_shaft1 = [0, 0]; % y-coordinates
+plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
+
+% Plot the triangular arrowhead for the horizontal axis
+arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
+arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
+p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
+p1.EdgeColor = grayColor;
+
+%% plot
+plot(a, H, 'b', 'LineWidth', 2.25);       % Entropy function
+
+% Add vertical line at alpha = 0.5 from y = 0 to y = 1
+line([0.5 0.5], [0 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+
+% Add horizontal line at H = 1 from alpha = 0 to 0.5
+line([0 0.5], [1 1], 'Color', 'k', 'LineStyle', '--', 'LineWidth', 1.5);
+
+% Labels and title
+xlabel('Symbol probability, \alpha');
+ylabel('H(\alpha)');
+title('Entropy function H(\alpha)');
+
+% Legend and grid
+grid on;
+
+%% new figure
+% Plot
+figure;
+hold on;
+
+%% Axis
+ylim([-0.1, 1.2]);
+xlim([-0.1, 1.2]); 
+
+% Define the gray color for the axes and arrowheads
+grayColor = [0.5, 0.5, 0.5];
+
+% Plot the vertical line (Y Axis)
+x_shaft = [0, 0]; % x-coordinates
+y_shaft = [0, 1.1]; % y-coordinates
+plot(x_shaft, y_shaft, 'k-', 'LineWidth', 2.5, 'Color', grayColor);
+
+% Plot the triangular arrowhead for the vertical axis
+arrow_x = [-0.02, 0, 0.02]; % x-coordinates of the triangle (base from -20 to 20)
+arrow_y = [1.1, 1.15, 1.1]; % y-coordinates of the triangle (top at y = 600)
+p = fill(arrow_x, arrow_y, grayColor); % Fill the triangle with gray color
+p.EdgeColor = grayColor;
+
+% Plot the horizontal line (X Axis)
+x_shaft1 = [0, 1.1]; % x-coordinates
+y_shaft1 = [0, 0]; % y-coordinates
+plot(x_shaft1, y_shaft1, 'LineWidth', 2.5, 'Color', grayColor);
+
+% Plot the triangular arrowhead for the horizontal axis
+arrow_y1 = [-0.02, 0, 0.02]; % y-coordinates of the triangle (base from -10 to 10)
+arrow_x1 = [1.1, 1.15, 1.1]; % x-coordinates of the triangle (tip at x = 2050)
+p1 = fill(arrow_x1, arrow_y1, grayColor); % Fill the triangle with gray color
+p1.EdgeColor = grayColor;
+
+%% plot
+plot(a, 1 - H, 'b', 'LineWidth', 2.25);       % Channel capacity
+
+% Labels and title
+xlabel('Transition probability \alpha');
+ylabel('Channel capacity C');
+title('Channel capacity C');
+
+% Legend and grid
+grid on;

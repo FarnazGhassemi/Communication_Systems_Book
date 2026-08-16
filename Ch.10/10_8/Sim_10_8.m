@@ -1,36 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Illustrating Simulation 7-1:               %
-%     Types of Adverse Effects of Channel On Message Signal    %
-%                                                              %
-%        Book : Analog & Digital Communication Systems         %
-%                   By: Dr.Farnaz Ghassemi                     %
-%                     Chapter 1-Section                        %
-%                                                              %
-%                                                              %
-%   Version.2:             03/09/03---Dr.Ghassemi              %
-%   Version.1:             96/06/30---Dr.Ghassemi              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%---------------------------------------------------------------
-close all;
-clear all;
-clc;
-colors=[0,0,0;                       %1-Black
-        0,0,0.75;                    %2-Blue
-        214/255,39/255,40/255;       %3-Red
-        15/255,133/255,84/255;       %4-Green
-        118/255,78/255,159/255;      %5-Purple
-        225/255,124/255,5/255;       %6-Orange
-        56/255,166/255,165/255;      %7-Light Blue
-        204/255,80/255,62/255;       %8-Light Red
-        115/255,175/255,72/255;      %9-Light Green
-        237/255,173/255,8/255;       %10-Light Orange
-        148/255,52/255,110/255;      %11-Light Purple
-        70/255,0,114/255;            %12-Dark Blue
-        0,0.5,0.25                   %13-Green
-        ];
-grayColor = [0.5, 0.5, 0.5];
-marks={'-';'--';':';'-.'};
-
 % Set Text Font
 set(0, 'DefaultTextFontName', 'Helvetica', 'DefaultTextFontSize', 18, 'DefaultTextFontWeight', 'bold', 'DefaultTextColor', 'black');
 
@@ -58,22 +25,96 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 
 % Box Style for Axe
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
-%%---------------------------------------------------------------
-% Channel Capacity Simulation
-% This script visualizes Shannon's channel capacity formula.
 
-% Step 1: Define Parameters
-B = 10; % Bandwidth (Hz)
-SNR_dB = 0:1:30; % Signal-to-noise ratio (in dB)
-SNR = 10.^(SNR_dB/10); % Convert SNR to linear scale
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Step 2: Calculate Channel Capacity
-C = B * log2(1 + SNR); % Shannon's formula
+%ax = gca;
+%ax.XTick = -5:1:5; % Adjust the x-axis grid spacing
+%ax.YTick = -1:0.2:2; % Adjust the y-axis grid spacing
 
-% Step 3: Visualization
+% Define the data points
+x = [1, 3, 5, 7, 9, 11]; % n values (odd numbers)
+x1 = [1, 1/3, 1/5, 1/7, 1/9, 1/11]; % Code rate, r
+
+p_values = [0.01, 0.0001, 0.25, 0.5]; % Different p's to explore
+colors=[
+        0,0,0.75;                    %2-Blue
+        214/255,39/255,40/255;       %3-Red
+        15/255,133/255,84/255;       %4-Green
+        118/255,78/255,159/255;     %5-Purple
+
+        ];
+markers = ['o'];
+
+% Create a finer x-grid for interpolation
+%xq = linspace(min(x1), max(x1), 1000);
+xq = logspace(log10(min(x1)), log10(max(x1)), 1000);
+
 figure;
-plot(SNR_dB, C, 'LineWidth', 2);
-title('Channel Capacity vs SNR');
-xlabel('SNR (dB)');
-ylabel('Channel Capacity (bits per second)');
+hold on; grid on;
+
+% Decide which index gets %.4f (e.g., the first one)
+special_idx = 2;
+
+for idx = 1:length(p_values)
+    p = p_values(idx);
+    
+    % Initialize y
+    y = zeros(size(x));
+    
+    % Compute y[i] = sum of binomial probabilities from (n+1)/2 to n
+    for i = 1:length(x)
+        n = x(i);
+        k_start = (n + 1)/2; % starting value of k (majority)
+        
+        % Initialize the sum for the current n
+        y_sum = 0;
+        
+        % Compute the binomial probabilities for k_start to n
+        for k = k_start:n
+            y_sum = y_sum + nchoosek(n, k) * p^k * (1 - p)^(n - k);
+        end
+        
+        % Assign the result to y(i)
+        y(i) = y_sum;
+    end
+    
+    % Interpolate using makima
+    %y_interp = interp1(x1, y, xq, 'makima');
+    % Interpolate in log-log space
+    y_log = log10(y);
+    y_interp_log = interp1(log10(x1), y_log, log10(xq), 'makima');
+    y_interp = 10.^y_interp_log;
+
+    %y_interp = max(y_interp, 1e-8); % Clip to minimum value
+
+    % Choose format based on index
+    if idx == special_idx
+        label_str = sprintf('p = %.4f', p);
+    else
+        label_str = sprintf('p = %.2f', p);
+    end
+    
+    % Plot the interpolated curve
+    %plot(xq, y_interp, 'LineWidth', 2.25, 'Color', colors(idx, :), 'DisplayName', label_str);
+    loglog(xq, y_interp, 'LineWidth', 2.25,'Color', colors(idx, :), 'DisplayName', label_str);
+
+    % Plot the original data points
+    %plot(x1, y, 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off');
+    loglog(x1, y, 'ro', 'MarkerFaceColor', 'r', 'HandleVisibility', 'off'); 
+    hold on;
+end
+
+% Set axis properties
+set(gca, 'XScale', 'log');
+set(gca, 'YScale', 'log');
+%xlim([0.01, 10]);
+%ylim([1e-8, 1e-1]);
+
+% Labels and title
+xlabel('Code rate, r');
+ylabel('Average probability of error, P_\epsilon');
+
+% Legend and grid
+legend('Location', 'southeast');
 grid on;
