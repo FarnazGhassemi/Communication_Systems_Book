@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        Illustrating Chapter 5 Exponential Modulation :       %
-%                                  PM Modulation               %
+%           Illustrating Chapter 4 Phase Modulation :          %
+%                                  FM Modulation               %
 %                                                              %
 %        Book : Analog & Digital Communication Systems         %
 %                   By: Dr.Farnaz Ghassemi                     %
@@ -57,6 +57,7 @@ set(groot, 'DefaultAxesLineWidth', 0.5); % Default axes line width (affects grid
 % Box Style for Axe
 set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                 ECG                                     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,10 +65,10 @@ set(groot, 'DefaultAxesBox', 'on'); % Default: 'on' means axes have a box
 load('ECG.mat');  % Contains 'ECG' (time-domain signal)
 fs = 150;         % Sampling frequency
 Ts = 1/fs;        % Sampling interval
-
+m = ECG;
 % Limit to first 3 seconds
 t0 = 3;
-N = min(length(ECG), t0 * fs);
+N = min(length(m), t0 * fs);
 t = (0:N-1) /fs;
 m = ECG(1:N);
 
@@ -96,12 +97,13 @@ c=cos(2*pi*fc.*t);                   	% carrier signal
 C = fftshift(fft(c) / length(c));       % Fourier transform 
 s=sin(2*pi*fc.*t);                   	% carrier signal
 
-% PM Modulated signal
-Ac=1;
-Phi_Delta=2;%pi/4;%                     % PM Modulation Index
-u=(Ac*cos(2*pi*fc.*t+Phi_Delta*m));     % PM Modulated signal
-% phasedev = 0.1;
-% u=pmmod(m,fc,fs,phasedev);
+% FM Modulated signal
+F_Delta=5;                           % FM Modulation Index
+int_m = cumsum(m)/fs;
+u=cos(2*pi*fc.*t+2*pi*F_Delta*int_m);   % FM Modulated signal
+% fdev = 0.1;
+% u=fmmod(m,fc,fs,fdev);
+% U = fftshift(fft(u) / length(u));     % Fourier transform 
 U = fftshift(fft(u) / length(u));       % Fourier transform 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,7 +148,7 @@ subplot(2,1,1)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title(['The PM Modulated signal'])
+title(['The FM Modulated signal'])
 grid on
 subplot(2,1,2)
 plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2) 
@@ -173,7 +175,7 @@ subplot(3,1,3)
 plot(t,u,'Color', colors(3,:),'LineWidth', 2)
 xlabel('Time')
 ylabel('Amplitude')
-title('The PM Signal')
+title('The FM Signal')
 grid on
 
 
@@ -199,22 +201,5 @@ plot(f,abs(U),'Color', colors(3,:),'LineWidth', 2)
 xlim([-fp fp])
 xlabel('Frequency')
 ylabel('Magnitude')
-title('The PM Signal')
+title('The FM Signal')
 grid on
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %                            Save Figures                                 %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PM=cd;
-% FolderName = [PM,'\PNG\']   % Your destination folder
-% FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-% for iFig = 1:length(FigList)
-%   FigHandle = FigList(iFig);
-%   FigName   = num2str(get(FigHandle, 'Number'))
-%   set(0, 'CurrentFigure', FigHandle);
-%   set(gcf, 'Position', [100, 100, 1200, 800]); % Set size again
-%   savefig(gcf, [FolderName, FigName, '.fig']);
-%   print(gcf, [FolderName, FigName, '.png'], '-dpng', '-r300');
-%   % close(gcf)
-% end
-
